@@ -1,0 +1,6 @@
+# HTTPS in front of the web container, with a Let's Encrypt certificate Caddy renews itself.
+# DOMAIN comes from .env (e.g. academia-murillo.duckdns.org).
+{$DOMAIN} {
+	encode gzip
+	reverse_proxy web:80
+}

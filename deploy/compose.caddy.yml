@@ -1,0 +1,19 @@
+# Adds Caddy (HTTPS) to the stack for a server on the open internet:
+#   docker compose -f docker-compose.yml -f deploy/compose.caddy.yml up -d --build
+# web stops publishing 8080 to the world; only Caddy's 80/443 are open.
+services:
+  web:
+    ports: !reset []
+  caddy:
+    image: caddy:2.10
+    restart: unless-stopped
+    depends_on: [web]
+    ports:
+      - "80:80"
+      - "443:443"
+    environment:
+      - DOMAIN=${DOMAIN}
+    volumes:
+      - ./deploy/Caddyfile:/etc/caddy/Caddyfile:ro
+      - ./caddy-data:/data
+      - ./caddy-config:/config

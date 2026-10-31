@@ -5,6 +5,9 @@ media/gif/
 
 # Runtime data — users, passkeys, per-user state, session secret
 data/
+# Caddy's certificates and state (deploy/compose.caddy.yml)
+caddy-data/
+caddy-config/
 
 # Local config
 .env
