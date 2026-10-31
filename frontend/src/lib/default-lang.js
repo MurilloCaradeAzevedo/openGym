@@ -62,8 +62,9 @@ export function effectiveLang(S, config, navLangs = browserLangs()) {
   let cfg = config
   if (!cfg) {
     const seen = cachedDefaultLang()
-    if (seen === null) return own
-    cfg = { default_lang: seen }
+    // The standalone phone app may never reach a server, so waiting for its default would pin English.
+    if (seen === null && import.meta.env.VITE_MOBILE !== '1') return own
+    cfg = { default_lang: seen || '' }
   }
   return autoLang(S, cfg, navLangs) || own
 }

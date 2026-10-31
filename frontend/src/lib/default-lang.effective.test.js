@@ -2,7 +2,7 @@
 // effectiveLang: the language a copy is shown in on this device, and the cached instance default
 // (rememberDefaultLang) that stands in for /api/config until it answers, so a boot does not flash
 // the browser's language first.
-import { beforeEach, describe, expect, it } from 'vitest'
+import { beforeEach, describe, expect, it, vi } from 'vitest'
 import { effectiveLang, rememberDefaultLang, browserLangs } from './default-lang.js'
 
 const auto = { lang: 'en', langAuto: true }
@@ -34,6 +34,12 @@ describe('effectiveLang', () => {
   })
   it('with nothing seen yet, shows the stored language unchanged until the config answers', () => {
     expect(effectiveLang({ lang: 'pt', langAuto: true }, null, ['it'])).toBe('pt')
+  })
+  it('in the phone app, with nothing seen yet, follows the device language', () => {
+    vi.stubEnv('VITE_MOBILE', '1')
+    try {
+      expect(effectiveLang(auto, null, ['pt-BR'])).toBe('pt-BR')
+    } finally { vi.unstubAllEnvs() }
   })
 })
 
