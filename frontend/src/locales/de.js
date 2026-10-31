@@ -2608,4 +2608,6 @@ export default {
   'Just for this phone. Some home screens take a moment to catch up.': 'Nur für dieses Handy. Manche Startbildschirme brauchen einen Moment, bis sie mitkommen.',
   'The icon could not be changed.': 'Das Icon ließ sich nicht ändern.',
   'Try the Halloween app icon': 'Probier das Halloween-App-Icon',
+  'What you eat': 'Was du isst',
+  'Daily calories and macros from your food diary for the last four weeks, your targets, and the foods of your latest logged day.': 'Tägliche Kalorien und Makros aus deinem Ernährungstagebuch der letzten vier Wochen, deine Ziele und die Lebensmittel deines zuletzt erfassten Tages.',
 }

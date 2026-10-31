@@ -9,5 +9,6 @@ export const DATA_CATEGORIES = Object.freeze([
   'training',    // logged sets, targets, effort ratings, durations, PRs, session notes in the review window
   'bodyweight',  // weigh-ins in the window and your goal weight
   'profile',     // the intake answers you gave the Coach, including any limitations
+  'nutrition',   // daily calorie and macro totals from the food diary, your targets, and today's foods
   'prefs'        // unit, language, effort scale
 ]);

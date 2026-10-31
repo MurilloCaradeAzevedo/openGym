@@ -19,8 +19,32 @@ import { dayNoteOf } from '../lib/day-notes.js'
 import { weighInAt } from '../lib/bodyweight.js'
 import WeightRate from '../components/WeightRate.jsx'
 import { SeasonDeco } from '../components/Seasonal.jsx'
+import { dayTotals } from '../lib/nutrition.js'
 
 // Home = what to do now + a quick glance. Deep charts & history live in Stats.
+// Today's eating at a glance (lib/nutrition.js); the sheets load with the Nutrition screen.
+const nutritionSheets = () => import('./Nutrition.jsx')
+function FoodToday({ S, nav }) {
+  const total = dayTotals(S.food, todayISO())
+  const goal = S.foodTargets?.kcal
+  const pct = goal ? Math.min(100, Math.round(total.kcal / goal * 100)) : 0
+  return <div className="card">
+    <div className="row between" style={{ marginBottom: 6 }}>
+      <h2 style={{ margin: 0 }}>{t('Eaten today')}</h2>
+      <button className="iconbtn" onClick={() => nav('/nutrition')} aria-label={t('Nutrition')}><Icon name="chevronRight" /></button>
+    </div>
+    <div className="big">{fmtNum(total.kcal)} <span className="muted" style={{ fontSize: '1rem' }}>{goal ? t('of {0} kcal', fmtNum(goal)) : 'kcal'}</span></div>
+    {goal ? <div style={{ height: 8, borderRadius: 4, background: 'var(--fill-3, rgba(127,127,127,.2))', margin: '8px 0 4px' }}>
+      <div style={{ width: pct + '%', height: '100%', borderRadius: 4, background: total.kcal > goal ? 'var(--red)' : 'var(--acc)' }} />
+    </div> : null}
+    <div className="small dim" style={{ marginBottom: 12 }}>{t('P {0} · C {1} · F {2}', fmtNum(total.p), fmtNum(total.c), fmtNum(total.f))}</div>
+    <div className="row" style={{ gap: 8 }}>
+      <Button variant="primary" icon="camera" onClick={() => nutritionSheets().then(m => m.photoMealSheet())}>{t('Meal photo')}</Button>
+      <Button icon="plus" onClick={() => nutritionSheets().then(m => m.addFoodSheet())}>{t('Add food')}</Button>
+    </div>
+  </div>
+}
+
 export default function Home() {
   const nav = useNavigate()
   const S = useStore(s => s.S)
@@ -192,6 +216,14 @@ export default function Home() {
         <div style={{ height: 8 }} /><Button onClick={() => nav('/plan')}>{t('Build my own plan')}</Button>
       </div>
     )}
+
+    <FoodToday S={S} nav={nav} />
+
+    <div className="card row between" style={{ alignItems: 'center', gap: 12 }}>
+      <div style={{ minWidth: 0 }}><h2 style={{ margin: 0 }}>{t('Friends')}</h2>
+        <div className="muted small" style={{ marginTop: 4 }}>{t('Ranking, streaks and a nudge for whoever is skipping the gym.')}</div></div>
+      <Button size="sm" variant="tinted" trailingIcon="chevronRight" style={{ flexShrink: 0 }} onClick={() => nav('/friends')}>{t('Open')}</Button>
+    </div>
 
     {S.showWeightCard !== false && <div className="card">
       <div className="row between bw-head" style={{ marginBottom: 6 }}>

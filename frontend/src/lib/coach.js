@@ -75,6 +75,7 @@ export const CATEGORY_TEXT = {
   training: () => [t('Your logged training'), t('Sets you logged in the review window: weights, reps, times, effort ratings, how long sessions took, and your session notes.')],
   bodyweight: () => [t('Body weight'), t('Weigh-ins from the same window, and your goal weight if you set one.')],
   profile: () => [t('What you tell the Coach'), t('Your intake answers, including any limitations or injuries you describe.')],
+  nutrition: () => [t('What you eat'), t('Daily calories and macros from your food diary for the last four weeks, your targets, and the foods of your latest logged day.')],
   prefs: () => [t('A few preferences'), t('Your unit, your language and which effort scale you log.')]
 }
 export const hasConsent = S => !!S?.coach?.consent?.agreedAt && S.coach.consent.version === CONSENT_VERSION

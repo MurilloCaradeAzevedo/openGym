@@ -167,6 +167,12 @@ tags:
       attached to a logged workout. Stored per profile (one quota for both) and named
       by the SHA-256 of its bytes; the state only carries a `MediaRef`. Every route here is a
       404 when the instance runs with `MEDIA_UPLOADS=0`.
+  - name: social
+    description: >-
+      Friends. A friend code per profile, requests that become a friendship once accepted, a
+      feed of friends' workout summaries, this week's ranking and a nudge for a friend who has
+      been away. A friend sees workout summaries and streaks only: never sets, notes, weigh-ins,
+      photos or the food diary.
   - name: coach
     description: >-
       AI Coach: plans, reviews and debriefs. Every route here answers 503 unless the
@@ -1766,6 +1772,171 @@ paths:
             application/json:
               schema: { $ref: '#/components/schemas/Error' }
               example: { error: "date must be YYYY-MM-DD", code: "date-invalid" }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+
+  /api/social:
+    get:
+      tags: [social]
+      operationId: socialOverview
+      summary: Your friend code, friends, requests and unseen nudges
+      description: |
+        `code` is your friend code (made on first call). Each friend comes with `daysAway`
+        (whole days since their newest workout, null if none) and `streak` (consecutive weeks
+        with a workout). `incoming` and `outgoing` are pending requests; `nudges` the ones not
+        yet marked seen.
+      responses:
+        '200':
+          description: The overview.
+          content:
+            application/json:
+              schema: { type: object }
+              example: { code: "K7M2Q9XA", friends: [{ id: "u_bea", name: "Bea", daysAway: 4, streak: 6 }], incoming: [], outgoing: [], nudges: [] }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+
+  /api/social/request:
+    post:
+      tags: [social]
+      operationId: socialRequest
+      summary: Ask someone to be your friend, by their code
+      description: If they already asked you, this accepts their request instead (`status` friends).
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { type: object, properties: { code: { type: string } }, required: [code] }
+      responses:
+        '200':
+          description: '`status` is `requested` or `friends`.'
+          content:
+            application/json:
+              schema: { type: object }
+              example: { ok: true, status: "requested" }
+        '400':
+          description: '`self`: your own code. `limit`: too many friends.'
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Error' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '404':
+          description: '`unknown-code`: no profile has that code.'
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Error' }
+
+  /api/social/accept:
+    post:
+      tags: [social]
+      operationId: socialAccept
+      summary: Accept a friend request
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { type: object, properties: { id: { type: string } }, required: [id] }
+      responses:
+        '200': { description: Now friends. }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '404':
+          description: '`no-request`: that profile has not asked you.'
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Error' }
+
+  /api/social/remove:
+    post:
+      tags: [social]
+      operationId: socialRemove
+      summary: Decline, withdraw or end a friendship
+      description: Removes any request between you and that profile, the friendship, and nudges either way.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { type: object, properties: { id: { type: string } }, required: [id] }
+      responses:
+        '200': { description: Done. }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+
+  /api/social/feed:
+    get:
+      tags: [social]
+      operationId: socialFeed
+      summary: Friends' workouts from the last 30 days, and this week's ranking
+      description: |
+        Each feed item is one workout summary: day, routine name, minutes, work sets, volume
+        and records, newest first, at most 60. The ranking includes you and orders by this
+        week's workouts, then volume. `week` is the Monday it counts from (server date, UTC).
+      responses:
+        '200':
+          description: Feed and ranking.
+          content:
+            application/json:
+              schema: { type: object }
+              example: { feed: [{ who: "u_bea", name: "Bea", d: "2026-10-29", title: "Legs", minutes: 52, sets: 18, vol: 9120, prs: 1 }], ranking: [{ id: "u_bea", name: "Bea", workouts: 3, vol: 24000, streak: 6 }], week: "2026-10-26" }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+
+  /api/social/nudge:
+    post:
+      tags: [social]
+      operationId: socialNudge
+      summary: Nudge a friend who has been away
+      description: Only a friend away three days or more, once a day. Sends them a push where they have one.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { type: object, properties: { id: { type: string } }, required: [id] }
+      responses:
+        '200': { description: Sent. }
+        '400':
+          description: '`recent`: they trained in the last three days.'
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Error' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '404':
+          description: '`not-friend`.'
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Error' }
+        '429':
+          description: '`again`: already nudged them today.'
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Error' }
+
+  /api/social/fire:
+    post:
+      tags: [social]
+      operationId: socialFire
+      summary: Give, or take back, a 🔥 on a friend's workout
+      description: '`id` is the friend, `wid` the workout id from the feed. Calling again takes it back.'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { type: object, properties: { id: { type: string }, wid: { type: string } }, required: [id, wid] }
+      responses:
+        '200':
+          description: '`fired` says whether your 🔥 is on it now.'
+          content:
+            application/json:
+              schema: { type: object }
+              example: { ok: true, fired: true }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '404':
+          description: '`not-friend` or `no-workout`.'
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Error' }
+
+  /api/social/nudges/seen:
+    post:
+      tags: [social]
+      operationId: socialNudgesSeen
+      summary: Mark your nudges as seen
+      responses:
+        '200': { description: Done. }
         '401': { $ref: '#/components/responses/Unauthorized' }
 
   /api/media/{hash}:

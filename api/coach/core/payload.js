@@ -444,6 +444,40 @@ function weighIns(S, from, to) {
     .filter(b => b.d && b.w !== undefined && (!from || b.d >= from) && (!to || b.d <= to));
 }
 
+/* The food diary (frontend/src/lib/nutrition.js): one total per logged day since `from`, the
+   daily targets, and with `withItems` the foods of the newest day. Null when nothing is logged. */
+export const NUTRITION_DAYS = 28;
+export const NUTRITION_ITEMS = 40;
+const MACROS = ['kcal', 'p', 'c', 'f'];
+const r1 = x => Math.round(x * 10) / 10;
+export function nutrition(S, from, withItems = false) {
+  const food = list(S.food).filter(e => e && typeof e === 'object' && day(e.d) && (!from || day(e.d) >= from));
+  const goal = S.foodTargets && typeof S.foodTargets === 'object' ? S.foodTargets : null;
+  if (!food.length && !goal) return null;
+  const byDay = new Map();
+  for (const e of food) {
+    const d = day(e.d);
+    const x = byDay.get(d) || { d, kcal: 0, p: 0, c: 0, f: 0, items: 0 };
+    for (const m of MACROS) x[m] += Number(num(e[m])) || 0;
+    x.items++;
+    byDay.set(d, x);
+  }
+  const days = [...byDay.values()].sort((a, b) => (a.d < b.d ? -1 : 1)).slice(-NUTRITION_DAYS)
+    .map(x => ({ ...x, kcal: Math.round(x.kcal), p: r1(x.p), c: r1(x.c), f: r1(x.f) }));
+  const out = {
+    targets: goal ? Object.fromEntries(MACROS.map(m => [m, num(goal[m]) ?? null])) : null,
+    days
+  };
+  const last = days[days.length - 1]?.d;
+  if (withItems && last) {
+    out.lastDayFoods = food.filter(e => day(e.d) === last).slice(0, NUTRITION_ITEMS).map(e => ({
+      meal: word(e.meal, 12), name: word(e.name, NAME_MAX), g: num(e.g) ?? null,
+      kcal: num(e.kcal) ?? null, p: num(e.p) ?? null, c: num(e.c) ?? null, f: num(e.f) ?? null
+    }));
+  }
+  return out;
+}
+
 /* The room's medians are computed on this server, but from other people's synced workouts —
    state their own clients wrote. cohort.js keeps only catalogue exercises; this copy bounds
    every field again, so what reaches one person's prompt never depends on that filter alone. */
@@ -615,6 +649,11 @@ export function build(S, opts = {}) {
       p.userNote = String(opts.refine).slice(0, MAX_NOTE_CHARS);
     }
   }
+  // The four weeks of eating before today, so training and diet are read together.
+  const since = new Date();
+  since.setDate(since.getDate() - NUTRITION_DAYS);
+  const eaten = nutrition(S, iso(since), opts.kind === 'ask' || opts.kind === 'debrief');
+  if (eaten) p.nutrition = eaten;
   if (opts.kind !== 'debrief') {
     const said = conversation(coach, [opts.note, opts.refine]);
     if (said.length) p.conversation = said;
