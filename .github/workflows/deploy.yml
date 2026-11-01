@@ -1,0 +1,75 @@
+name: Deploy
+
+# After main's images are published (docker-publish.yml), and only when the tests of that same
+# commit passed (test.yml), the production server pulls them and restarts. Skipped until the
+# repository has the DEPLOY_HOST, DEPLOY_USER and DEPLOY_SSH_KEY secrets (and the DEPLOY_DOMAIN
+# variable for the health check), and on any repository other than the fork it was written for.
+on:
+  workflow_run:
+    workflows: ["Publish Docker images"]
+    types: [completed]
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  actions: read
+
+concurrency:
+  group: deploy
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    if: github.repository == 'MurilloCaradeAzevedo/openGym' && (github.event_name == 'workflow_dispatch' || github.event.workflow_run.conclusion == 'success')
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    environment: production
+    env:
+      HAS_SECRETS: ${{ secrets.DEPLOY_HOST != '' && secrets.DEPLOY_SSH_KEY != '' }}
+      SHA: ${{ github.event.workflow_run.head_sha || github.sha }}
+    steps:
+      - name: Secrets present
+        if: env.HAS_SECRETS != 'true'
+        run: echo "::notice::No DEPLOY_* secrets yet, nothing deployed." && exit 0
+
+      - name: Tests passed for this commit
+        if: env.HAS_SECRETS == 'true'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        # The tests and the image build start from the same push; wait for the tests to finish.
+        run: |
+          for i in $(seq 1 40); do
+            run=$(gh api "repos/${{ github.repository }}/actions/workflows/test.yml/runs?head_sha=$SHA&per_page=1" --jq '.workflow_runs[0] | "\(.status) \(.conclusion)"' 2>/dev/null || echo "none none")
+            echo "tests for $SHA: $run"
+            case "$run" in
+              "completed success") exit 0 ;;
+              completed*) echo "::error::Tests did not pass for $SHA; not deploying."; exit 1 ;;
+            esac
+            sleep 30
+          done
+          echo "::error::Tests for $SHA did not finish in 20 minutes; not deploying."; exit 1
+
+      - name: Pull and restart on the server
+        if: env.HAS_SECRETS == 'true'
+        env:
+          HOST: ${{ secrets.DEPLOY_HOST }}
+          USER: ${{ secrets.DEPLOY_USER || 'ubuntu' }}
+          KEY: ${{ secrets.DEPLOY_SSH_KEY }}
+        run: |
+          install -m 700 -d ~/.ssh
+          printf '%s\n' "$KEY" > ~/.ssh/deploy && chmod 600 ~/.ssh/deploy
+          ssh-keyscan -T 10 "$HOST" >> ~/.ssh/known_hosts 2>/dev/null
+          ssh -i ~/.ssh/deploy "$USER@$HOST" 'set -e; cd ~/opengym
+            git fetch --depth 1 origin main && git reset --hard FETCH_HEAD
+            C="sudo docker compose -f docker-compose.yml -f deploy/compose.prod.yml"
+            $C pull && $C up -d --remove-orphans && sudo docker image prune -f >/dev/null'
+
+      - name: Health check
+        if: env.HAS_SECRETS == 'true' && vars.DEPLOY_DOMAIN != ''
+        run: |
+          for i in $(seq 1 20); do
+            curl -fsS "https://${{ vars.DEPLOY_DOMAIN }}/api/health" && exit 0
+            sleep 6
+          done
+          echo "::error::https://${{ vars.DEPLOY_DOMAIN }}/api/health did not answer"; exit 1

@@ -1,0 +1,33 @@
+# Production on one server: the images CI publishes for this fork, Caddy for HTTPS, bounded logs.
+#   docker compose -f docker-compose.yml -f deploy/compose.prod.yml pull
+#   docker compose -f docker-compose.yml -f deploy/compose.prod.yml up -d
+# IMAGE_OWNER and IMAGE_TAG come from .env (setup-server.sh writes them).
+x-logging: &logging
+  driver: json-file
+  options: { max-size: "10m", max-file: "5" }
+
+services:
+  api:
+    image: ghcr.io/${IMAGE_OWNER}/opengym-api:${IMAGE_TAG:-edge}
+    pull_policy: always
+    logging: *logging
+  web:
+    image: ghcr.io/${IMAGE_OWNER}/opengym-web:${IMAGE_TAG:-edge}
+    pull_policy: always
+    # Only Caddy is reachable from outside; web is on the compose network.
+    ports: !reset []
+    logging: *logging
+  caddy:
+    image: caddy:2.10
+    restart: unless-stopped
+    depends_on: [web]
+    ports:
+      - "80:80"
+      - "443:443"
+    environment:
+      - DOMAIN=${DOMAIN}
+    volumes:
+      - ./deploy/Caddyfile:/etc/caddy/Caddyfile:ro
+      - ./caddy-data:/data
+      - ./caddy-config:/config
+    logging: *logging
