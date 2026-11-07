@@ -2685,4 +2685,17 @@ export default {
   'On fire: {0} weeks in a row.': '불타오르는 중: {0}주 연속',
   '{0} week in a row': '{0}주 연속',
   '{0} weeks in a row': '{0}주 연속',
+  // --- Leafy "Seu Dia" ---
+  'Worked out': '운동했어요',
+  'Ate': '먹었어요',
+  'Every day you show up counts.': '나타난 모든 날이 소중해요.',
+  'Good afternoon': '좋은 오후예요',
+  'Good afternoon, {0}': '좋은 오후예요, {0}님',
+  'Good evening': '좋은 저녁이에요',
+  'Good evening, {0}': '좋은 저녁이에요, {0}님',
+  'Good morning': '좋은 아침이에요',
+  'Good morning, {0}': '좋은 아침이에요, {0}님',
+  'How was your day?': '오늘 하루 어땠어요?',
+  'Your garden this week': '이번 주 나의 정원',
+  '{0} of 7 days': '7일 중 {0}일',
 }

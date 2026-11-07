@@ -2705,4 +2705,17 @@ export default {
   'On fire: {0} weeks in a row.': 'Auf Feuer: {0} Wochen in Folge.',
   '{0} week in a row': '{0} Woche in Folge',
   '{0} weeks in a row': '{0} Wochen in Folge',
+  // --- Leafy "Seu Dia" ---
+  'Worked out': 'Trainiert',
+  'Ate': 'Gegessen',
+  'Every day you show up counts.': 'Jeder Tag, an dem du dabei bist, zählt.',
+  'Good afternoon': 'Guten Tag',
+  'Good afternoon, {0}': 'Guten Tag, {0}',
+  'Good evening': 'Guten Abend',
+  'Good evening, {0}': 'Guten Abend, {0}',
+  'Good morning': 'Guten Morgen',
+  'Good morning, {0}': 'Guten Morgen, {0}',
+  'How was your day?': 'Wie war dein Tag?',
+  'Your garden this week': 'Dein Garten diese Woche',
+  '{0} of 7 days': '{0} von 7 Tagen',
 }

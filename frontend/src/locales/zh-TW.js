@@ -2678,4 +2678,17 @@ export default {
   'On fire: {0} weeks in a row.': '火力全開：連續 {0} 週。',
   '{0} week in a row': '連續 {0} 週',
   '{0} weeks in a row': '連續 {0} 週',
+  // --- Leafy "Seu Dia" ---
+  'Worked out': '練了',
+  'Ate': '吃了',
+  'Every day you show up counts.': '堅持的每一天都算數。',
+  'Good afternoon': '午安',
+  'Good afternoon, {0}': '午安，{0}',
+  'Good evening': '晚上好',
+  'Good evening, {0}': '晚上好，{0}',
+  'Good morning': '早安',
+  'Good morning, {0}': '早安，{0}',
+  'How was your day?': '今天過得如何？',
+  'Your garden this week': '本週你的花園',
+  '{0} of 7 days': '7 天中的 {0} 天',
 }

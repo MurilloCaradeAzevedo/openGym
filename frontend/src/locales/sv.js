@@ -2732,4 +2732,17 @@ export default {
   'On fire: {0} weeks in a row.': 'I brand: {0} veckor i rad.',
   '{0} week in a row': '{0} vecka i rad',
   '{0} weeks in a row': '{0} veckor i rad',
+  // --- Leafy "Seu Dia" ---
+  'Worked out': 'Tränade',
+  'Ate': 'Åt',
+  'Every day you show up counts.': 'Varje dag du dyker upp räknas.',
+  'Good afternoon': 'God eftermiddag',
+  'Good afternoon, {0}': 'God eftermiddag, {0}',
+  'Good evening': 'God kväll',
+  'Good evening, {0}': 'God kväll, {0}',
+  'Good morning': 'God morgon',
+  'Good morning, {0}': 'God morgon, {0}',
+  'How was your day?': 'Hur var din dag?',
+  'Your garden this week': 'Din trädgård den här veckan',
+  '{0} of 7 days': '{0} av 7 dagar',
 }

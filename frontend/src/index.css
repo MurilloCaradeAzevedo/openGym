@@ -2348,3 +2348,20 @@ button.wl-summary{width:100%;padding:0 0 10px;text-align:start;border-radius:var
 .gym-radius-row>:first-child{flex:1}
 .gym-radius-val{min-width:64px;text-align:end;font-variant-numeric:tabular-nums;color:var(--label-2)}
 .gym-actions{display:flex;flex-direction:column;gap:10px;margin:4px 0 30px}
+
+/* ------------------------------------------------- Leafy "Seu Dia" (Home) -- */
+.dia-row{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:12px}
+.dia-card{display:flex;flex-direction:column;align-items:flex-start;gap:4px;min-height:120px;padding:16px;
+  border:0;border-radius:var(--r-xl);background:var(--surface);color:var(--label);
+  font:inherit;text-align:start;cursor:pointer;transition:transform var(--fast) var(--ease)}
+.dia-card:active{transform:scale(.98)}
+.dia-card:focus-visible{outline:2px solid var(--acc);outline-offset:2px}
+.dia-i{display:grid;place-items:center;width:36px;height:36px;border-radius:50%;background:var(--acc-soft);color:var(--acc);font-size:18px;margin-bottom:auto}
+.dia-card.is-done .dia-i{background:var(--acc);color:var(--on-acc)}
+.dia-t{font-size:20px;font-weight:600;letter-spacing:-.017em}
+.dia-s{font-size:14px;color:var(--label-2)}
+.garden-days{display:grid;grid-template-columns:repeat(7,1fr);gap:6px}
+.garden-day{display:grid;place-items:center;aspect-ratio:1;border-radius:50%;background:var(--surface-2);color:var(--label-4);font-size:16px}
+.garden-day.grew{background:var(--acc-soft);color:var(--acc)}
+.garden-day.today{box-shadow:inset 0 0 0 1.5px var(--acc)}
+.garden-day.future{opacity:.5}
