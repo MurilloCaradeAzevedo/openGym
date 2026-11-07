@@ -1,13 +1,9 @@
 <svg xmlns="http://www.w3.org/2000/svg" width="1024" height="1024" viewBox="0 0 512 512">
-  <!-- App-icon source == the PWA icon (public/icon-512.png), geometry traced 1:1 so the
-       native app, the home-screen PWA and the website favicon all show the same icon.
-       Generate platform icons + splash via `npx @capacitor/assets generate` — docs/MOBILE.md. -->
-  <rect width="512" height="512" fill="#0c0e12"/>
-  <g fill="#a3e635">
-    <rect x="80" y="242" width="352" height="28"/>
-    <rect x="80" y="199" width="36" height="114"/>
-    <rect x="131" y="169" width="47" height="174"/>
-    <rect x="334" y="169" width="47" height="174"/>
-    <rect x="396" y="199" width="36" height="114"/>
+  <!-- App-icon source == the PWA icon (public/icon-512.png): Leafy's leaf, two arcs of one radius
+       meeting at the tips. scripts/app-icons.mjs reads this <g> for the alternate icons.
+       Generate platform icons + splash via `npx @capacitor/assets generate` (docs/MOBILE.md). -->
+  <rect width="512" height="512" fill="#2e7d32"/>
+  <g fill="#faf9f6">
+    <path d="M133 379A205 205 0 0 1 379 133A205 205 0 0 1 133 379Z"/>
   </g>
 </svg>

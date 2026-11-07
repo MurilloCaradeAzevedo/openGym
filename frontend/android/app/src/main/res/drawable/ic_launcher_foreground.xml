@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Leafy's leaf (resources/icon.svg), the adaptive icon's foreground: two arcs of one radius,
+     inside the 72dp the launcher's mask always shows. Also the themed (monochrome) layer. -->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="108dp"
+    android:height="108dp"
+    android:viewportWidth="108"
+    android:viewportHeight="108">
+    <path
+        android:fillColor="#FAF9F6"
+        android:pathData="M36.7,71.3A28.8,28.8 0,0 1,71.3 36.7A28.8,28.8 0,0 1,36.7 71.3Z" />
+</vector>

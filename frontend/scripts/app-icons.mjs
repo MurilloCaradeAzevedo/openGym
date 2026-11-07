@@ -2,7 +2,7 @@
 /* The alternate home-screen icons (Settings → Look & Home → App icon), drawn from
  * src/lib/app-icon-variants.js and the dumbbell in resources/icon.svg.
  *
- * The glyph is five rectangles, so this draws them itself (4x4 to 8x8 samples per pixel for the
+ * The glyph is a few simple shapes (rectangles, the leaf's two arcs), so this draws them itself (4x4 to 8x8 samples per pixel for the
  * edges) and writes the PNGs with node:zlib: no sharp or resvg to install, and the same bytes on
  * every machine, which the test checks. A variant with `art` (Halloween) is a hand-made SVG
  * instead, drawn by the small renderer below (rect, circle, line, polyline, polygon, one radial
@@ -26,34 +26,44 @@ export const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..')
 export const PREVIEW = 112
 export const IOS_SIZE = 1024
 
-/** The glyph's rectangles, in the 512 grid of resources/icon.svg: one source for every icon. */
+// Leafy's leaf: two arcs of radius r from one tip to the other, `M x1 y1 A r r 0 0 1 x2 y2 A r r 0 0 1 x1 y1 Z`.
+const LEAF = /<path\s+d="M(\d+) (\d+)A(\d+) \3 0 0 1 (\d+) (\d+)A\3 \3 0 0 1 \1 \2Z"\s*\/>/
+
+/**
+ * The glyph of resources/icon.svg, in its 512 grid: one source for every icon. Rectangles (the
+ * old dumbbell) and the leaf path above; returns its markup and `hit(x, y)`, true inside it.
+ */
 export function glyph(svg = readFileSync(join(ROOT, 'resources/icon.svg'), 'utf8')) {
-  const g = svg.match(/<g[^>]*>([\s\S]*?)<\/g>/)?.[1] || ''
-  return [...g.matchAll(/<rect\s+x="(\d+)"\s+y="(\d+)"\s+width="(\d+)"\s+height="(\d+)"/g)]
-    .map(m => m.slice(1, 5).map(Number))
+  const g = (svg.replace(/<!--[\s\S]*?-->/g, '').match(/<g[^>]*>([\s\S]*?)<\/g>/)?.[1] || '').trim()
+  const rects = [...g.matchAll(/<rect\s+x="(\d+)"\s+y="(\d+)"\s+width="(\d+)"\s+height="(\d+)"/g)].map(m => m.slice(1, 5).map(Number))
+  const lenses = [...g.matchAll(new RegExp(LEAF.source, 'g'))].map(m => {
+    const [x1, y1, r, x2, y2] = m.slice(1, 6).map(Number)
+    // The two arcs are the edges of two circles of radius r through both tips; the leaf is
+    // where they overlap. Their centres sit on the chord's perpendicular, either side of it.
+    const mx = (x1 + x2) / 2, my = (y1 + y2) / 2, half = Math.hypot(x2 - x1, y2 - y1) / 2
+    const h = Math.sqrt(r * r - half * half), nx = -(y2 - y1) / (2 * half), ny = (x2 - x1) / (2 * half)
+    return [[mx + h * nx, my + h * ny], [mx - h * nx, my - h * ny], r]
+  })
+  if (!rects.length && !lenses.length) throw new Error('resources/icon.svg: no glyph in its <g>')
+  const hit = (x, y) => rects.some(([rx, ry, rw, rh]) => x >= rx && x < rx + rw && y >= ry && y < ry + rh)
+    || lenses.some(([[ax, ay], [bx, by], r]) => (x - ax) ** 2 + (y - ay) ** 2 <= r * r && (x - bx) ** 2 + (y - by) ** 2 <= r * r)
+  return { markup: g, hit }
 }
 
 const rgb = hex => [1, 3, 5].map(i => parseInt(hex.slice(i, i + 2), 16))
 
 /** One icon `size` px square: the background, the glyph on it, optionally cut to a circle. */
-export function draw(v, size, { round = false, rects = glyph() } = {}) {
+export function draw(v, size, { round = false, shape = glyph() } = {}) {
   if (v.art) return drawArt(readFileSync(join(ROOT, v.art), 'utf8'), size)
   const k = size <= 256 ? 8 : 4
   const bg = rgb(v.bg), fg = rgb(v.fg)
   const ch = round ? 4 : 3
   const out = Buffer.alloc(size * size * ch)
   const scale = 512 / size
-  // Per sample row, the glyph's spans across it: the inner loop then only compares numbers.
-  const spans = []
-  for (let s = 0; s < size * k; s++) {
-    const gy = (s + 0.5) / k * scale
-    spans.push(rects.filter(([, ry, , rh]) => gy >= ry && gy < ry + rh).map(([rx, , rw]) => [rx, rx + rw]))
-  }
   for (let y = 0; y < size; y++) for (let x = 0; x < size; x++) {
     let inside = 0, on = 0
     for (let sy = 0; sy < k; sy++) {
       const py = y + (sy + 0.5) / k
-      const row = spans[y * k + sy]
       for (let sx = 0; sx < k; sx++) {
         const px = x + (sx + 0.5) / k
         if (round) {
@@ -61,8 +71,7 @@ export function draw(v, size, { round = false, rects = glyph() } = {}) {
           if (dx * dx + dy * dy > (size / 2) * (size / 2)) continue
         }
         inside++
-        const gx = px * scale
-        for (const [a, b] of row) if (gx >= a && gx < b) { on++; break }
+        if (shape.hit(px * scale, py * scale)) on++
       }
     }
     const o = (y * size + x) * ch
@@ -202,11 +211,11 @@ export function pngInfo(buf) {
   return { width: buf.readUInt32BE(16), height: buf.readUInt32BE(20), alpha: buf[25] === 6 || buf[25] === 4 }
 }
 
-const svgOf = (v, rects) => `<svg xmlns="http://www.w3.org/2000/svg" width="1024" height="1024" viewBox="0 0 512 512">
-  <!-- openGym app icon "${v.id}", written by scripts/app-icons.mjs (the glyph of resources/icon.svg). -->
+const svgOf = (v, shape) => `<svg xmlns="http://www.w3.org/2000/svg" width="1024" height="1024" viewBox="0 0 512 512">
+  <!-- Leafy app icon "${v.id}", written by scripts/app-icons.mjs (the glyph of resources/icon.svg). -->
   <rect width="512" height="512" fill="${v.bg}"/>
   <g fill="${v.fg}">
-${rects.map(([x, y, w, h]) => `    <rect x="${x}" y="${y}" width="${w}" height="${h}"/>`).join('\n')}
+    ${shape.markup}
   </g>
 </svg>
 `
@@ -228,15 +237,15 @@ const iosContents = `{
 `
 
 /** Every file this script owns, as [path relative to frontend/, () => contents]: drawn on demand. */
-export function files(rects = glyph()) {
+export function files(shape = glyph()) {
   const out = []
   for (const v of APP_ICON_VARIANTS) {
-    out.push([`public/app-icons/${v.id}.png`, () => draw(v, PREVIEW, { rects })])
+    out.push([`public/app-icons/${v.id}.png`, () => draw(v, PREVIEW, { shape })])
     if (v.id === 'default') continue
-    if (!v.art) out.push([`resources/icons/${v.id}.svg`, () => svgOf(v, rects)])
+    if (!v.art) out.push([`resources/icons/${v.id}.svg`, () => svgOf(v, shape)])
     const set = `ios/App/App/Assets.xcassets/${v.ios}.appiconset`
     out.push([`${set}/Contents.json`, () => iosContents])
-    out.push([`${set}/icon-1024.png`, () => draw(v, IOS_SIZE, { rects })])
+    out.push([`${set}/icon-1024.png`, () => draw(v, IOS_SIZE, { shape })])
   }
   return out
 }
