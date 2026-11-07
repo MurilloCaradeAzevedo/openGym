@@ -2682,4 +2682,17 @@ export default {
   'On fire: {0} weeks in a row.': { one: 'У ударі: {0} тиждень поспіль.', few: 'У ударі: {0} тижні поспіль.', many: 'У ударі: {0} тижнів поспіль.' },
   '{0} week in a row': '{0} тиждень поспіль',
   '{0} weeks in a row': { one: '{0} тиждень поспіль', few: '{0} тижні поспіль', many: '{0} тижнів поспіль' },
+  // --- Leafy "Seu Dia" ---
+  'Worked out': 'Тренування',
+  'Ate': 'Поїв(ла)',
+  'Every day you show up counts.': 'Важливий кожен день, коли ти приходиш.',
+  'Good afternoon': 'Добрий день',
+  'Good afternoon, {0}': 'Добрий день, {0}',
+  'Good evening': 'Добрий вечір',
+  'Good evening, {0}': 'Добрий вечір, {0}',
+  'Good morning': 'Доброго ранку',
+  'Good morning, {0}': 'Доброго ранку, {0}',
+  'How was your day?': 'Як минув твій день?',
+  'Your garden this week': 'Твій сад цього тижня',
+  '{0} of 7 days': '{0} з 7 днів',
 }

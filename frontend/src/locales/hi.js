@@ -2685,4 +2685,17 @@ export default {
   'On fire: {0} weeks in a row.': 'जोश में: लगातार {0} हफ़्ते।',
   '{0} week in a row': 'लगातार {0} हफ़्ता',
   '{0} weeks in a row': 'लगातार {0} हफ़्ते',
+  // --- Leafy "Seu Dia" ---
+  'Worked out': 'कसरत की',
+  'Ate': 'खाया',
+  'Every day you show up counts.': 'हर वह दिन मायने रखता है जब आप आते हैं।',
+  'Good afternoon': 'शुभ दोपहर',
+  'Good afternoon, {0}': 'शुभ दोपहर, {0}',
+  'Good evening': 'शुभ संध्या',
+  'Good evening, {0}': 'शुभ संध्या, {0}',
+  'Good morning': 'सुप्रभात',
+  'Good morning, {0}': 'सुप्रभात, {0}',
+  'How was your day?': 'आपका दिन कैसा रहा?',
+  'Your garden this week': 'इस हफ़्ते आपका बगीचा',
+  '{0} of 7 days': '7 में से {0} दिन',
 }

@@ -2764,4 +2764,17 @@ export default {
   'On fire: {0} weeks in a row.': 'দারুণ ছন্দে: টানা {0} সপ্তাহ।',
   '{0} week in a row': 'টানা {0} সপ্তাহ',
   '{0} weeks in a row': 'টানা {0} সপ্তাহ',
+  // --- Leafy "Seu Dia" ---
+  'Worked out': 'ব্যায়াম করেছি',
+  'Ate': 'খেয়েছি',
+  'Every day you show up counts.': 'যেদিনই আপনি আসেন, সেটাই গোনা হয়।',
+  'Good afternoon': 'শুভ অপরাহ্ন',
+  'Good afternoon, {0}': 'শুভ অপরাহ্ন, {0}',
+  'Good evening': 'শুভ সন্ধ্যা',
+  'Good evening, {0}': 'শুভ সন্ধ্যা, {0}',
+  'Good morning': 'সুপ্রভাত',
+  'Good morning, {0}': 'সুপ্রভাত, {0}',
+  'How was your day?': 'আপনার দিন কেমন কাটল?',
+  'Your garden this week': 'এই সপ্তাহে আপনার বাগান',
+  '{0} of 7 days': '7 দিনের মধ্যে {0} দিন',
 }

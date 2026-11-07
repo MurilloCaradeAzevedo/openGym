@@ -2688,4 +2688,17 @@ export default {
   'On fire: {0} weeks in a row.': 'Lángol: {0} hete egymás után',
   '{0} week in a row': '{0} hete egymás után',
   '{0} weeks in a row': '{0} hete egymás után',
+  // --- Leafy "Seu Dia" ---
+  'Worked out': 'Edzettem',
+  'Ate': 'Ettem',
+  'Every day you show up counts.': 'Minden nap számít, amikor jelen vagy.',
+  'Good afternoon': 'Jó napot',
+  'Good afternoon, {0}': 'Jó napot, {0}',
+  'Good evening': 'Jó estét',
+  'Good evening, {0}': 'Jó estét, {0}',
+  'Good morning': 'Jó reggelt',
+  'Good morning, {0}': 'Jó reggelt, {0}',
+  'How was your day?': 'Milyen volt a napod?',
+  'Your garden this week': 'A kerted ezen a héten',
+  '{0} of 7 days': '7 napból {0}',
 }

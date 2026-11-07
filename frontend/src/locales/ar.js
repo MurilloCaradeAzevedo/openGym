@@ -2740,4 +2740,17 @@ export default {
   'On fire: {0} weeks in a row.': 'متقد بالحماس: {0} أسابيع متتالية.',
   '{0} week in a row': '{0} أسبوع متتالٍ',
   '{0} weeks in a row': '{0} أسابيع متتالية',
+  // --- Leafy "Seu Dia" ---
+  'Worked out': 'تمرنت',
+  'Ate': 'أكلت',
+  'Every day you show up counts.': 'كل يوم تحضر فيه يُحتسب.',
+  'Good afternoon': 'طاب يومك',
+  'Good afternoon, {0}': 'طاب يومك، {0}',
+  'Good evening': 'مساء الخير',
+  'Good evening, {0}': 'مساء الخير، {0}',
+  'Good morning': 'صباح الخير',
+  'Good morning, {0}': 'صباح الخير، {0}',
+  'How was your day?': 'كيف كان يومك؟',
+  'Your garden this week': 'حديقتك هذا الأسبوع',
+  '{0} of 7 days': '{0} من 7 أيام',
 }

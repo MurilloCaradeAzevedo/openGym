@@ -2685,4 +2685,17 @@ export default {
   'On fire: {0} weeks in a row.': 'Alev alev: üst üste {0} hafta',
   '{0} week in a row': 'Üst üste {0} hafta',
   '{0} weeks in a row': 'Üst üste {0} hafta',
+  // --- Leafy "Seu Dia" ---
+  'Worked out': 'Antrenman yaptım',
+  'Ate': 'Yedim',
+  'Every day you show up counts.': 'Kendine vakit ayırdığın her gün sayılır.',
+  'Good afternoon': 'Tünaydın',
+  'Good afternoon, {0}': 'Tünaydın, {0}',
+  'Good evening': 'İyi akşamlar',
+  'Good evening, {0}': 'İyi akşamlar, {0}',
+  'Good morning': 'Günaydın',
+  'Good morning, {0}': 'Günaydın, {0}',
+  'How was your day?': 'Günün nasıl geçti?',
+  'Your garden this week': 'Bu haftaki bahçen',
+  '{0} of 7 days': '7 günün {0} günü',
 }
