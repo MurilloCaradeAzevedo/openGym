@@ -16,6 +16,10 @@ services:
     pull_policy: always
     # Only Caddy is reachable from outside; web is on the compose network.
     ports: !reset []
+    # Caddy sets X-Real-IP to the visitor (deploy/Caddyfile); nginx forwards it as the header the
+    # api trusts first. Safe only because nothing but Caddy can reach web. $$ = a literal $.
+    environment:
+      - CF_CONNECTING_IP=$$http_x_real_ip
     logging: *logging
   caddy:
     image: caddy:2.10

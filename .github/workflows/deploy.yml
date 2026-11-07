@@ -21,7 +21,7 @@ concurrency:
 
 jobs:
   deploy:
-    if: github.repository == 'MurilloCaradeAzevedo/openGym' && (github.event_name == 'workflow_dispatch' || github.event.workflow_run.conclusion == 'success')
+    if: github.repository == 'MurilloCaradeAzevedo/openGym' && ((github.event_name == 'workflow_dispatch' && github.ref == 'refs/heads/main') || github.event.workflow_run.conclusion == 'success')
     runs-on: ubuntu-latest
     timeout-minutes: 15
     environment: production
@@ -56,14 +56,19 @@ jobs:
           HOST: ${{ secrets.DEPLOY_HOST }}
           USER: ${{ secrets.DEPLOY_USER || 'ubuntu' }}
           KEY: ${{ secrets.DEPLOY_SSH_KEY }}
+          KNOWN_HOSTS: ${{ secrets.DEPLOY_KNOWN_HOSTS }}
+        # The key is a forced command on the server (deploy/redeploy.sh via setup-server.sh): all
+        # it can do is start the images CI built from the commit sent here.
         run: |
           install -m 700 -d ~/.ssh
           printf '%s\n' "$KEY" > ~/.ssh/deploy && chmod 600 ~/.ssh/deploy
-          ssh-keyscan -T 10 "$HOST" >> ~/.ssh/known_hosts 2>/dev/null
-          ssh -i ~/.ssh/deploy "$USER@$HOST" 'set -e; cd ~/opengym
-            git fetch --depth 1 origin main && git reset --hard FETCH_HEAD
-            C="sudo docker compose -f docker-compose.yml -f deploy/compose.prod.yml"
-            $C pull && $C up -d --remove-orphans && sudo docker image prune -f >/dev/null'
+          if [ -n "$KNOWN_HOSTS" ]; then
+            printf '%s\n' "$KNOWN_HOSTS" > ~/.ssh/known_hosts
+          else
+            echo "::warning::DEPLOY_KNOWN_HOSTS is not set; trusting the host key on first use."
+            ssh-keyscan -T 10 "$HOST" >> ~/.ssh/known_hosts 2>/dev/null
+          fi
+          ssh -i ~/.ssh/deploy -o StrictHostKeyChecking=yes "$USER@$HOST" "$SHA"
 
       - name: Health check
         if: env.HAS_SECRETS == 'true' && vars.DEPLOY_DOMAIN != ''

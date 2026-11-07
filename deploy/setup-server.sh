@@ -1,10 +1,11 @@
 #!/usr/bin/env bash
 # One-time setup of an Ubuntu server for openGym in production (Oracle Cloud Always Free ARM, or any
 # VPS). Safe to run again: it updates the deploy files and restarts; ./data is never touched.
-#   curl -fsSL https://raw.githubusercontent.com/MurilloCaradeAzevedo/openGym/main/deploy/setup-server.sh | bash -s -- <domain>
+#   curl -fsSL https://raw.githubusercontent.com/MurilloCaradeAzevedo/openGym/main/deploy/setup-server.sh | bash -s -- <domain> ['<CI deploy public key>']
 # Images come from CI (.github/workflows/docker-publish.yml); this server never builds.
 set -euo pipefail
-DOMAIN="${1:?usage: setup-server.sh <domain>}"
+DOMAIN="${1:?usage: setup-server.sh <domain> [deploy-public-key]}"
+DEPLOY_PUBKEY="${2:-}"
 OWNER="${IMAGE_OWNER:-murillocaradeazevedo}"
 REPO="${REPO:-https://github.com/MurilloCaradeAzevedo/openGym.git}"
 BRANCH="${BRANCH:-main}"
@@ -39,8 +40,9 @@ RP_ID=$DOMAIN
 ORIGIN=https://$DOMAIN
 IMAGE_OWNER=$OWNER
 IMAGE_TAG=edge
-# The first profile created becomes the admin: create yours right after the first start.
-FIRST_USER_ADMIN=1
+# No FIRST_USER_ADMIN on a public address: whoever signed up first would own the instance.
+# Create your profile, copy Settings > Account > Account ID here, then run this script again.
+ADMIN_UIDS=
 # Name and password sign-in next to passkeys, so friends on any phone can join.
 PASSWORD_LOGIN=1
 DEFAULT_LANG=pt-BR
@@ -53,7 +55,21 @@ $COMPOSE pull
 $COMPOSE up -d --remove-orphans
 $COMPOSE ps
 
+# Root runs these, so root owns the copies: a later git pull of the repo cannot change them.
+sudo install -o root -g root -m 755 deploy/backup.sh /usr/local/sbin/opengym-backup
+sudo install -o root -g root -m 755 deploy/redeploy.sh /usr/local/sbin/opengym-redeploy
+
 # Nightly backup at 03:30 server time, as root: the api writes db.json and the secret 0600.
-chmod +x deploy/backup.sh
-( sudo crontab -l 2>/dev/null | grep -v 'opengym/deploy/backup.sh'; echo "30 3 * * * OPENGYM_DIR=$DIR BACKUP_DIR=$HOME/opengym-backups $DIR/deploy/backup.sh >> /var/log/opengym-backup.log 2>&1" ) | sudo crontab -
+( sudo crontab -l 2>/dev/null | grep -v 'opengym-backup\|opengym/deploy/backup.sh'; echo "30 3 * * * OPENGYM_DIR=$DIR BACKUP_DIR=$HOME/opengym-backups /usr/local/sbin/opengym-backup >> /var/log/opengym-backup.log 2>&1" ) | sudo crontab -
+
+# The CI deploy key can run the redeploy script and nothing else: no shell, no forwarding.
+if [ -n "$DEPLOY_PUBKEY" ]; then
+  install -m 700 -d "$HOME/.ssh"
+  touch "$HOME/.ssh/authorized_keys" && chmod 600 "$HOME/.ssh/authorized_keys"
+  grep -vF "$DEPLOY_PUBKEY" "$HOME/.ssh/authorized_keys" > "$HOME/.ssh/authorized_keys.new" || true
+  # "$SSH_ORIGINAL_COMMAND" stays literal here: sshd's shell expands it into one argument, and
+  # the script refuses anything but a 40-character sha.
+  printf 'command="sudo OPENGYM_DIR=%s /usr/local/sbin/opengym-redeploy \\"$SSH_ORIGINAL_COMMAND\\"",no-pty,no-port-forwarding,no-agent-forwarding,no-X11-forwarding %s\n' "$DIR" "$DEPLOY_PUBKEY" >> "$HOME/.ssh/authorized_keys.new"
+  mv "$HOME/.ssh/authorized_keys.new" "$HOME/.ssh/authorized_keys"
+fi
 echo "Done: https://$DOMAIN (the certificate can take a minute on the first start)"

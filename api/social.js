@@ -16,6 +16,11 @@ export const FEED_DAYS = 30;
 export const FEED_MAX = 60;
 export const MAX_FRIENDS = 200;
 export const NUDGE_AFTER_DAYS = 3;
+// Pending requests one profile may have out at once, so nobody fills db.json by asking everyone.
+export const MAX_PENDING = 50;
+// A friend's workout that claims more is a broken or hostile client, not a training session.
+export const MAX_VOL = 1_000_000;
+export const MAX_MINUTES = 24 * 60;
 const DAY = 86400000;
 // No 0/O, 1/I/L: read aloud or typed from a screenshot.
 const ALPHABET = 'ABCDEFGHJKMNPQRSTUVWXYZ23456789';
@@ -41,6 +46,7 @@ export function dropSocial(db, uid) {
   if (Array.isArray(s.friends)) s.friends = s.friends.filter(f => f.a !== uid && f.b !== uid);
   if (Array.isArray(s.nudges)) s.nudges = s.nudges.filter(n => n.from !== uid && n.to !== uid);
   if (Array.isArray(s.fires)) s.fires = s.fires.filter(f => f.from !== uid && f.to !== uid);
+  if (s.pushed && typeof s.pushed === 'object') for (const k of Object.keys(s.pushed)) if (k.split('>').includes(uid)) delete s.pushed[k];
 }
 const iso = ms => new Date(ms).toISOString().slice(0, 10);
 
@@ -56,9 +62,10 @@ export function workoutSummary(w) {
   }
   return {
     wid: typeof w.id === 'string' ? w.id.slice(0, 64) : null,
-    d: w.d, title: typeof w.name === 'string' ? w.name.slice(0, 60) : null,
-    minutes: w.end && w.start ? Math.max(0, Math.round((w.end - w.start) / 60000)) : null,
-    sets, vol: Math.round(Number.isFinite(w.vol) ? w.vol : vol),
+    // The state file is client-written: everything that reaches a friend is cut to a sane size.
+    d: w.d.slice(0, 10), title: typeof w.name === 'string' ? w.name.slice(0, 60) : null,
+    minutes: w.end && w.start ? Math.min(MAX_MINUTES, Math.max(0, Math.round((w.end - w.start) / 60000))) : null,
+    sets, vol: Math.min(MAX_VOL, Math.max(0, Math.round(Number.isFinite(w.vol) ? w.vol : vol) || 0)),
     prs: Array.isArray(w.prs) ? w.prs.length : 0
   };
 }
@@ -111,8 +118,20 @@ export function socialRoutes({ db, saveDb, json, readBody, readSession, readStat
     const s = db.social;
     s.codes = s.codes && typeof s.codes === 'object' ? s.codes : {};
     for (const k of ['requests', 'friends', 'nudges', 'fires']) s[k] = Array.isArray(s[k]) ? s[k] : [];
+    // When a request push last went from one profile to another, kept apart from `requests` so
+    // that removing and asking again does not buy a fresh notification.
+    s.pushed = s.pushed && typeof s.pushed === 'object' ? s.pushed : {};
     return s;
   };
+  const pushOnce = (from, to, payload) => {
+    const s = social();
+    for (const [k, at] of Object.entries(s.pushed)) if (now() - at >= DAY) delete s.pushed[k];
+    const key = `${from}>${to}`;
+    if (s.pushed[key]) return;
+    s.pushed[key] = now();
+    sendPush(to, payload);
+  };
+  const full = uid => friendIds(uid).length >= MAX_FRIENDS;
   const codeOf = uid => {
     const s = social();
     if (!s.codes[uid]) {
@@ -170,7 +189,7 @@ export function socialRoutes({ db, saveDb, json, readBody, readSession, readStat
       if (!code || !to || !live(to)) return json(res, 404, { error: 'no profile with that code', code: 'unknown-code' });
       if (to === user.id) return json(res, 400, { error: 'that is your own code', code: 'self' });
       if (areFriends(user.id, to)) return json(res, 200, { ok: true, status: 'friends' });
-      if (friendIds(user.id).length >= MAX_FRIENDS) return json(res, 400, { error: 'too many friends', code: 'limit' });
+      if (full(user.id) || full(to)) return json(res, 400, { error: 'too many friends', code: 'limit' });
       const back = s.requests.find(r => r.from === to && r.to === user.id);
       if (back) {
         s.requests = s.requests.filter(r => r !== back);
@@ -179,9 +198,10 @@ export function socialRoutes({ db, saveDb, json, readBody, readSession, readStat
         return json(res, 200, { ok: true, status: 'friends' });
       }
       if (!s.requests.some(r => r.from === user.id && r.to === to)) {
+        if (s.requests.filter(r => r.from === user.id).length >= MAX_PENDING) return json(res, 400, { error: 'too many pending requests', code: 'limit' });
         s.requests.push({ from: user.id, to, at: now() });
+        pushOnce(user.id, to, { title: 'openGym', body: `${nameOf(user.id) || 'Someone'} wants to be your gym friend`, tag: 'social-request', url: '#/friends' });
         saveDb();
-        sendPush(to, { title: 'openGym', body: `${nameOf(user.id) || 'Someone'} wants to be your gym friend`, tag: 'social-request', url: '#/friends' });
       }
       json(res, 200, { ok: true, status: 'requested' });
     },
@@ -192,6 +212,7 @@ export function socialRoutes({ db, saveDb, json, readBody, readSession, readStat
       const s = social();
       const r = s.requests.find(x => x.from === id && x.to === user.id);
       if (!r || !live(id)) return json(res, 404, { error: 'no such request', code: 'no-request' });
+      if (!areFriends(id, user.id) && (full(user.id) || full(id))) return json(res, 400, { error: 'too many friends', code: 'limit' });
       s.requests = s.requests.filter(x => x !== r);
       if (!areFriends(id, user.id)) s.friends.push({ a: id, b: user.id, at: now() });
       saveDb();
