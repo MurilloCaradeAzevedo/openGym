@@ -1091,6 +1091,8 @@ const THROTTLED = {
   'POST /api/account/passkeys/options': null, 'POST /api/account/device-link': null,
   // Pairing a phone: the same, for the password that may prove it.
   'POST /api/pair/create': null,
+  // A friend code is a guessable target: asking with one spends the same budget.
+  'POST /api/social/request': null,
   'DELETE /api/account/passkeys': null,
   // Deleting the account: the same, for the password that may prove it.
   'POST /api/account/delete': null

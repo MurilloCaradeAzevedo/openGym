@@ -2,5 +2,10 @@
 # DOMAIN comes from .env (e.g. academia-murillo.duckdns.org).
 {$DOMAIN} {
 	encode gzip
-	reverse_proxy web:80
+	reverse_proxy web:80 {
+		# The visitor's own address, overwriting anything the client sent. compose.prod.yml has
+		# nginx pass it on as CF-Connecting-IP, which the api's sign-in throttle trusts first;
+		# without it every visitor shares Caddy's address and one bad actor locks everyone out.
+		header_up X-Real-IP {remote_host}
+	}
 }

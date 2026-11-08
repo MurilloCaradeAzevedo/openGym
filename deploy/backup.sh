@@ -3,6 +3,8 @@
 # Installed as a cron job by setup-server.sh. Copy ~/opengym-backups off the server too:
 # a backup on the same disk does not survive the disk.
 set -euo pipefail
+# The archive holds data/secret: private from the first byte, not only after the chmod below.
+umask 077
 DIR="${OPENGYM_DIR:-$HOME/opengym}"
 OUT="${BACKUP_DIR:-$HOME/opengym-backups}"
 KEEP_DAYS="${KEEP_DAYS:-14}"
