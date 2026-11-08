@@ -5,7 +5,6 @@ import { fmtNum, todayISO } from '../lib/format.js'
 import { dayTotals } from '../lib/nutrition.js'
 import { gardenWeek } from '../lib/day-garden.js'
 import Icon from './Icon.jsx'
-import MoveOfDay from './MoveOfDay.jsx'
 import { recognitionFor } from '../lib/leafy/recognition.ts'
 import { recordsOf } from '../lib/leafy/day-move.ts'
 
@@ -29,7 +28,7 @@ function DayCard({ icon, title, sub, done, onClick }) {
   </button>
 }
 
-export default function SeuDia({ S, name, trainedToday, onTrain, onEat, onOpenExercise }) {
+export default function SeuDia({ S, name, trainedToday, onTrain, onEat }) {
   const food = dayTotals(S.food, todayISO())
   const { days, grown } = gardenWeek(S)
   return <>
@@ -51,6 +50,5 @@ export default function SeuDia({ S, name, trainedToday, onTrain, onEat, onOpenEx
       </div>
       <div className="small muted" style={{ marginTop: 12 }}>{recognitionLine(S, name)}</div>
     </div>
-    <MoveOfDay S={S} onOpen={onOpenExercise} />
   </>
 }
