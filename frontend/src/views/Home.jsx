@@ -20,6 +20,8 @@ import { weighInAt } from '../lib/bodyweight.js'
 import WeightRate from '../components/WeightRate.jsx'
 import { SeasonDeco } from '../components/Seasonal.jsx'
 import { dayTotals } from '../lib/nutrition.js'
+import { greetingFor } from '../lib/day-garden.js'
+import SeuDia from '../components/SeuDia.jsx'
 
 // Home = what to do now + a quick glance. Deep charts & history live in Stats.
 // Today's eating at a glance (lib/nutrition.js); the sheets load with the Nutrition screen.
@@ -128,12 +130,20 @@ export default function Home() {
   // already in progress wins, as on the today row — starting another would overwrite it.
   const onQueueStart = id => { if (S.active) nav('/workout'); else startFlow([id]) }
 
+  // Leafy: a greeting by the time of day (lib/day-garden.js), with the name when signed in.
+  const part = greetingFor(today)
+  const greeting = user
+    ? (part === 'morning' ? t('Good morning, {0}', user.name) : part === 'afternoon' ? t('Good afternoon, {0}', user.name) : t('Good evening, {0}', user.name))
+    : (part === 'morning' ? t('Good morning') : part === 'afternoon' ? t('Good afternoon') : t('Good evening'))
+
   return <div className="narrow">
     <div className="hdr">
       <SeasonDeco spot="header-bats" />
-      <div><h1>{user ? t('Hi {0}', user.name) : 'Leafy'}</h1><div className="sub">{today.toLocaleDateString(dateLocale(), { weekday: 'long', day: 'numeric', month: 'long' })}</div></div>
+      <div><h1>{greeting}</h1><div className="sub">{t('How was your day?')}</div></div>
       <button className="iconbtn" onClick={() => nav('/settings')} aria-label={trouble ? t('Settings') + ', ' + t('Connection problem') : t('Settings')}><Icon name="gear" />{trouble && <span className="tab-dot" aria-hidden="true" />}</button>
     </div>
+
+    <SeuDia S={S} trainedToday={!!doneToday} onTrain={onToday} onEat={() => nav('/nutrition')} />
 
     <div className="card">
       {/* A coach week runs by order, not by weekday, so its progress row stands in for the

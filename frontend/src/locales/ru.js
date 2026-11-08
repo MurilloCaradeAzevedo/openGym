@@ -2689,4 +2689,17 @@ export default {
   'On fire: {0} weeks in a row.': { one: 'В ударе: {0} неделя подряд.', few: 'В ударе: {0} недели подряд.', many: 'В ударе: {0} недель подряд.' },
   '{0} week in a row': '{0} неделя подряд',
   '{0} weeks in a row': { one: '{0} неделя подряд', few: '{0} недели подряд', many: '{0} недель подряд' },
+  // --- Leafy "Seu Dia" ---
+  'Worked out': 'Тренировка',
+  'Ate': 'Поел(а)',
+  'Every day you show up counts.': 'Важен каждый день, когда ты приходишь.',
+  'Good afternoon': 'Добрый день',
+  'Good afternoon, {0}': 'Добрый день, {0}',
+  'Good evening': 'Добрый вечер',
+  'Good evening, {0}': 'Добрый вечер, {0}',
+  'Good morning': 'Доброе утро',
+  'Good morning, {0}': 'Доброе утро, {0}',
+  'How was your day?': 'Как прошёл твой день?',
+  'Your garden this week': 'Твой сад на этой неделе',
+  '{0} of 7 days': '{0} из 7 дней',
 }

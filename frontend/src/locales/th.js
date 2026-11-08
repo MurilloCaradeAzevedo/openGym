@@ -2696,4 +2696,17 @@ export default {
   'On fire: {0} weeks in a row.': 'ไฟแรงมาก: ต่อเนื่อง {0} สัปดาห์',
   '{0} week in a row': 'ต่อเนื่อง {0} สัปดาห์',
   '{0} weeks in a row': 'ต่อเนื่อง {0} สัปดาห์',
+  // --- Leafy "Seu Dia" ---
+  'Worked out': 'ออกกำลังแล้ว',
+  'Ate': 'กินแล้ว',
+  'Every day you show up counts.': 'ทุกวันที่คุณไม่ยอมแพ้มีความหมาย',
+  'Good afternoon': 'สวัสดีตอนบ่าย',
+  'Good afternoon, {0}': 'สวัสดีตอนบ่าย {0}',
+  'Good evening': 'สวัสดีตอนเย็น',
+  'Good evening, {0}': 'สวัสดีตอนเย็น {0}',
+  'Good morning': 'สวัสดีตอนเช้า',
+  'Good morning, {0}': 'สวัสดีตอนเช้า {0}',
+  'How was your day?': 'วันนี้เป็นอย่างไรบ้าง',
+  'Your garden this week': 'สวนของคุณสัปดาห์นี้',
+  '{0} of 7 days': '{0} จาก 7 วัน',
 }
