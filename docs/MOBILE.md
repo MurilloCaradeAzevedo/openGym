@@ -446,16 +446,24 @@ it after every web-code change before building natively.
 
 ## App icons & splash screens
 
-`frontend/resources/icon.svg` is the 1024×1024 source (the app's dumbbell glyph on the
+`frontend/resources/icon.svg` is the 1024×1024 source (Leafy's leaf on the
 app background). Generate all platform assets from it on a machine with the tooling:
 
 ```sh
 cd frontend
-npx @capacitor/assets@3.0.5 generate --iconBackgroundColor '#0c0e12' --splashBackgroundColor '#0c0e12'
+npx @capacitor/assets@3.0.5 generate --android --iconBackgroundColor '#2e7d32' --iconBackgroundColorDark '#1a1a1a' --splashBackgroundColor '#faf9f6' --splashBackgroundColorDark '#1a1a1a' --logoSplashScale 0.18
 ```
 
 The generator is not a dependency of the app (it pulls in an old Capacitor CLI and sharp),
 so `npx` fetches it for that one run.
+
+The splash screens come from `resources/logo.svg` and `logo-dark.svg` (the leaf alone). The
+launcher icon itself is not taken from the generator: `res/drawable/ic_launcher_foreground.xml` is
+the leaf as a vector (also the Android 13 themed icon), on the `ic_launcher_background` colour, and
+the legacy `mipmap-*/ic_launcher*.png` and `public/icon-180.png` / `icon-512.png` are drawn by
+`draw()` in `scripts/app-icons.mjs` from the `default` variant. After running the generator, put
+`mipmap-anydpi-v26/` and `AndroidManifest.xml` back (`git checkout`) and delete the
+`mipmap-*/ic_launcher_foreground.png` / `_background.png` it writes.
 
 (If the generator won't take the SVG directly, export it to `resources/icon.png` at
 1024×1024 first; any image tool can do it.)

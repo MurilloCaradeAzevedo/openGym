@@ -7,12 +7,12 @@
 // has the picker on the iPhone only, so nothing reads it here yet). `art` is a hand-made SVG the
 // script renders instead of the glyph; `bg`/`fg` are then just its main colours.
 export const APP_ICON_VARIANTS = [
-  { id: 'default', name: 'Original', bg: '#0c0e12', fg: '#a3e635', ios: null, android: 'IconDefault' },
-  { id: 'light', name: 'Light', bg: '#ffffff', fg: '#65a30d', ios: 'AppIcon-Light', android: 'IconLight' },
-  { id: 'mono', name: 'Mono', bg: '#0c0e12', fg: '#f2f2f7', ios: 'AppIcon-Mono', android: 'IconMono' },
-  { id: 'neon', name: 'Green', bg: '#a3e635', fg: '#0c0e12', ios: 'AppIcon-Neon', android: 'IconNeon' },
+  { id: 'default', name: 'Original', bg: '#2e7d32', fg: '#faf9f6', ios: null, android: 'IconDefault' },
+  { id: 'light', name: 'Light', bg: '#faf9f6', fg: '#2e7d32', ios: 'AppIcon-Light', android: 'IconLight' },
+  { id: 'mono', name: 'Mono', bg: '#1a1a1a', fg: '#faf9f6', ios: 'AppIcon-Mono', android: 'IconMono' },
+  { id: 'neon', name: 'Green', bg: '#1a1a1a', fg: '#66bb6a', ios: 'AppIcon-Neon', android: 'IconNeon' },
   { id: 'sky', name: 'Blue', bg: '#0a84ff', fg: '#ffffff', ios: 'AppIcon-Sky', android: 'IconSky' },
-  { id: 'orange', name: 'Orange', bg: '#ff9f0a', fg: '#0c0e12', ios: 'AppIcon-Orange', android: 'IconOrange' },
+  { id: 'orange', name: 'Orange', bg: '#ff9f0a', fg: '#1a1a1a', ios: 'AppIcon-Orange', android: 'IconOrange' },
   { id: 'pink', name: 'Pink', bg: '#ff375f', fg: '#ffffff', ios: 'AppIcon-Pink', android: 'IconPink' },
   { id: 'violet', name: 'Purple', bg: '#bf5af2', fg: '#ffffff', ios: 'AppIcon-Violet', android: 'IconViolet' },
   // All year, Halloween theme or not: some people are spooky in March.
