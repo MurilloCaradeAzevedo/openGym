@@ -3,7 +3,7 @@
 import { dayKey, daysBetween, weekDays, type DayKey } from './dates';
 import { dayGrew, type DayRecord } from './garden';
 
-export type Recognition = { id: 'first-leaf' | 'welcome-back' | 'three-this-week' | 'daily'; text: string };
+export type Recognition = { id: 'first-leaf' | 'welcome-back' | 'three-this-week' | 'daily'; text: string; n?: number };
 
 const DAILY = [
   'Dia cuidado. Até amanhã.',
@@ -31,5 +31,5 @@ export function recognitionFor(
 
   // A frase muda a cada dia, sem sorteio: o mesmo dia mostra sempre a mesma.
   const n = Number(today.replace(/-/g, '')) % DAILY.length;
-  return { id: 'daily', text: DAILY[n] };
+  return { id: 'daily', text: DAILY[n], n };
 }

@@ -5,6 +5,21 @@ import { fmtNum, todayISO } from '../lib/format.js'
 import { dayTotals } from '../lib/nutrition.js'
 import { gardenWeek } from '../lib/day-garden.js'
 import Icon from './Icon.jsx'
+import MoveOfDay from './MoveOfDay.jsx'
+import { recognitionFor } from '../lib/leafy/recognition.ts'
+import { recordsOf } from '../lib/leafy/day-move.ts'
+
+// The gentle line under the garden (Leafy design 3.4): the first leaf, a welcome back, three days
+// this week, or one of four calm phrases that changes by the day. Nothing when today is still empty.
+const DAILY = ['A day cared for. See you tomorrow.', 'One more leaf in your garden.', 'Little by little is still a way.', 'Glad you stopped by.']
+function recognitionLine(S, name) {
+  const r = recognitionFor(recordsOf(S), name || '')
+  if (!r) return t('Every day you show up counts.')
+  if (r.id === 'first-leaf') return name ? t('Your first leaf, {0}. A good start.', name) : t('Your first leaf. A good start.')
+  if (r.id === 'welcome-back') return name ? t('Good to see you again, {0}.', name) : t('Good to see you again.')
+  if (r.id === 'three-this-week') return t('3 days caring for yourself this week.')
+  return t(DAILY[r.n ?? 0])
+}
 
 function DayCard({ icon, title, sub, done, onClick }) {
   return <button type="button" className={'dia-card' + (done ? ' is-done' : '')} onClick={onClick}>
@@ -14,7 +29,7 @@ function DayCard({ icon, title, sub, done, onClick }) {
   </button>
 }
 
-export default function SeuDia({ S, trainedToday, onTrain, onEat }) {
+export default function SeuDia({ S, name, trainedToday, onTrain, onEat, onOpenExercise }) {
   const food = dayTotals(S.food, todayISO())
   const { days, grown } = gardenWeek(S)
   return <>
@@ -34,7 +49,8 @@ export default function SeuDia({ S, trainedToday, onTrain, onEat }) {
           <Icon name={d.grew ? 'leaf' : 'dot'} />
         </span>)}
       </div>
-      <div className="small muted" style={{ marginTop: 12 }}>{t('Every day you show up counts.')}</div>
+      <div className="small muted" style={{ marginTop: 12 }}>{recognitionLine(S, name)}</div>
     </div>
+    <MoveOfDay S={S} onOpen={onOpenExercise} />
   </>
 }

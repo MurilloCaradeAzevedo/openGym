@@ -4,6 +4,19 @@
 import pt from './pt.js'
 
 export const PT_BR_OVERRIDES = {
+  'Movement of the day': 'Movimento do dia',
+  'Another idea': 'Outra ideia',
+  '{0} × {1} reps': '{0} × {1} repetições',
+  '{0} × {1} s': '{0} × {1} s',
+  'Your first leaf, {0}. A good start.': 'Sua primeira folha, {0}. Que bom começar.',
+  'Your first leaf. A good start.': 'Sua primeira folha. Que bom começar.',
+  'Good to see you again, {0}.': 'Que bom te ver de novo, {0}.',
+  'Good to see you again.': 'Que bom te ver de novo.',
+  '3 days caring for yourself this week.': '3 dias cuidando de você esta semana.',
+  'A day cared for. See you tomorrow.': 'Dia cuidado. Até amanhã.',
+  'One more leaf in your garden.': 'Mais uma folha no seu jardim.',
+  'Little by little is still a way.': 'Pouco a pouco também é caminho.',
+  'Glad you stopped by.': 'Que bom que você passou por aqui.',
   'Every day you show up counts.': 'Cada dia em que você aparece conta.',
   'How was your day?': 'Como foi seu dia?',
   'Your garden this week': 'Seu jardim esta semana',

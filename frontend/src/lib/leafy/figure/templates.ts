@@ -169,6 +169,13 @@ export const TEMPLATES = {
   },
   twist: { frames: pair(f(STAND, { torso: -85 }), { handT: [30, 40] }, { handT: [32, -45] }) },
   neck: { upper: true, still: false, frames: pair(STAND, { neck: -90 }, { neck: -55 }) },
+  superman: {
+    frames: pair(
+      { anchor: 'hip', at: [118, 176], torso: 0, thigh: 180, shin: 180, foot: 120, arm: 0, fore: 0 },
+      {},
+      { torso: -12, thigh: 192, shin: 192, arm: -15, fore: -15 },
+    ),
+  },
   roll: {
     stage: 'roller',
     frames: pair(
