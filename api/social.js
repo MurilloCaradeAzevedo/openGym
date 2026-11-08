@@ -10,12 +10,17 @@
  * Friendship is mutual: it exists only once the other person accepts, and either side ends it.
  * Handed the server's helpers rather than importing them, like coach/routes.js. */
 import crypto from 'node:crypto';
+import { createWindow } from './rate-limit.js';
 
 export const CODE_LEN = 8;
 export const FEED_DAYS = 30;
 export const FEED_MAX = 60;
 export const MAX_FRIENDS = 200;
 export const NUDGE_AFTER_DAYS = 3;
+// Asking is rationed per person, so codes cannot be guessed in bulk and the file cannot be grown;
+// the same person is pushed about the same person at most once a day, however often they ask.
+export const ASK_PER_HOUR = 60;
+export const MAX_PENDING_OUT = 50;
 const DAY = 86400000;
 // No 0/O, 1/I/L: read aloud or typed from a screenshot.
 const ALPHABET = 'ABCDEFGHJKMNPQRSTUVWXYZ23456789';
@@ -41,6 +46,7 @@ export function dropSocial(db, uid) {
   if (Array.isArray(s.friends)) s.friends = s.friends.filter(f => f.a !== uid && f.b !== uid);
   if (Array.isArray(s.nudges)) s.nudges = s.nudges.filter(n => n.from !== uid && n.to !== uid);
   if (Array.isArray(s.fires)) s.fires = s.fires.filter(f => f.from !== uid && f.to !== uid);
+  if (s.asked && typeof s.asked === 'object') for (const k of Object.keys(s.asked)) if (k.split('>').includes(uid)) delete s.asked[k];
 }
 const iso = ms => new Date(ms).toISOString().slice(0, 10);
 
@@ -56,9 +62,9 @@ export function workoutSummary(w) {
   }
   return {
     wid: typeof w.id === 'string' ? w.id.slice(0, 64) : null,
-    d: w.d, title: typeof w.name === 'string' ? w.name.slice(0, 60) : null,
+    d: w.d.slice(0, 10), title: typeof w.name === 'string' ? w.name.slice(0, 60) : null,
     minutes: w.end && w.start ? Math.max(0, Math.round((w.end - w.start) / 60000)) : null,
-    sets, vol: Math.round(Number.isFinite(w.vol) ? w.vol : vol),
+    sets, vol: Math.min(1e9, Math.max(0, Math.round(Number.isFinite(w.vol) ? w.vol : vol))),
     prs: Array.isArray(w.prs) ? w.prs.length : 0
   };
 }
@@ -111,8 +117,10 @@ export function socialRoutes({ db, saveDb, json, readBody, readSession, readStat
     const s = db.social;
     s.codes = s.codes && typeof s.codes === 'object' ? s.codes : {};
     for (const k of ['requests', 'friends', 'nudges', 'fires']) s[k] = Array.isArray(s[k]) ? s[k] : [];
+    s.asked = s.asked && typeof s.asked === 'object' && !Array.isArray(s.asked) ? s.asked : {};
     return s;
   };
+  const asking = createWindow({ max: ASK_PER_HOUR, windowMs: 3600000, now });
   const codeOf = uid => {
     const s = social();
     if (!s.codes[uid]) {
@@ -164,6 +172,8 @@ export function socialRoutes({ db, saveDb, json, readBody, readSession, readStat
     'POST /api/social/request': async (req, res) => {
       const user = signedIn(req, res); if (!user) return;
       const body = await readBody(req);
+      const wait = asking.take(user.id);
+      if (wait) return json(res, 429, { error: 'too many requests, try again later', code: 'locked', retryAfter: wait }, { 'Retry-After': String(wait) });
       const code = cleanCode(body.code);
       const s = social();
       const to = Object.keys(s.codes).find(uid => s.codes[uid] === code);
@@ -179,9 +189,15 @@ export function socialRoutes({ db, saveDb, json, readBody, readSession, readStat
         return json(res, 200, { ok: true, status: 'friends' });
       }
       if (!s.requests.some(r => r.from === user.id && r.to === to)) {
+        if (s.requests.filter(r => r.from === user.id).length >= MAX_PENDING_OUT) return json(res, 400, { error: 'too many requests waiting', code: 'limit' });
         s.requests.push({ from: user.id, to, at: now() });
+        // One push per pair per day, even if the request is withdrawn and made again.
+        const key = `${user.id}>${to}`;
+        const push = !(s.asked[key] > now() - DAY);
+        for (const k of Object.keys(s.asked)) if (s.asked[k] <= now() - DAY) delete s.asked[k];
+        if (push) s.asked[key] = now();
         saveDb();
-        sendPush(to, { title: 'openGym', body: `${nameOf(user.id) || 'Someone'} wants to be your gym friend`, tag: 'social-request', url: '#/friends' });
+        if (push) sendPush(to, { title: 'openGym', body: `${nameOf(user.id) || 'Someone'} wants to be your gym friend`, tag: 'social-request', url: '#/friends' });
       }
       json(res, 200, { ok: true, status: 'requested' });
     },
@@ -192,6 +208,7 @@ export function socialRoutes({ db, saveDb, json, readBody, readSession, readStat
       const s = social();
       const r = s.requests.find(x => x.from === id && x.to === user.id);
       if (!r || !live(id)) return json(res, 404, { error: 'no such request', code: 'no-request' });
+      if (friendIds(user.id).length >= MAX_FRIENDS || friendIds(id).length >= MAX_FRIENDS) return json(res, 400, { error: 'too many friends', code: 'limit' });
       s.requests = s.requests.filter(x => x !== r);
       if (!areFriends(id, user.id)) s.friends.push({ a: id, b: user.id, at: now() });
       saveDb();

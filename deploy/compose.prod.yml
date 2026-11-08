@@ -16,6 +16,11 @@ services:
     pull_policy: always
     # Only Caddy is reachable from outside; web is on the compose network.
     ports: !reset []
+    # Caddy puts the visitor's address in X-Forwarded-For (it replaces whatever the visitor sent), and
+    # nginx would otherwise see only Caddy's. Without this every visitor shares one rate-limit bucket.
+    # Safe here because Caddy is the only way in; never set it on an install that exposes web directly.
+    environment:
+      - CF_CONNECTING_IP=$$http_x_forwarded_for
     logging: *logging
   caddy:
     image: caddy:2.10
