@@ -11,6 +11,23 @@ caddy-config/
 
 # Local config
 .env
+.env.*
+!.env.example
+
+# Signing keys, cloud config and credentials: never in the repository (scripts/check-secrets.mjs
+# stops a commit that carries one; enable it with `git config core.hooksPath .githooks`)
+*.keystore
+*.jks
+*.p12
+*.pfx
+*.pem
+*.key
+keystore-password*
+google-services.json
+GoogleService-Info.plist
+local.properties
+id_rsa*
+id_ed25519*
 
 # Build output / deps
 frontend/dist/

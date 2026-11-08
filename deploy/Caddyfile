@@ -2,5 +2,12 @@
 # DOMAIN comes from .env (e.g. academia-murillo.duckdns.org).
 {$DOMAIN} {
 	encode gzip
+	# Browsers talk to this host over HTTPS only (a year), and the page cannot use the camera,
+	# microphone, location or payment APIs even if something injected a script.
+	header {
+		Strict-Transport-Security "max-age=31536000"
+		Permissions-Policy "camera=(), microphone=(), geolocation=(), payment=(), usb=()"
+		-Server
+	}
 	reverse_proxy web:80
 }
