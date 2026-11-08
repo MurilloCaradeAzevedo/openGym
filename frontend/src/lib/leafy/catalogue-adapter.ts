@@ -56,3 +56,10 @@ export function fromCatalogue(e: Entry): DbExercise | null {
     steps: e.instructions ?? [],
   };
 }
+
+type Exdb = { id: string; n: string; tg?: string; sm?: string[]; eq?: string; cat?: string };
+
+/** The same translation for a record of the app's own exercise list (lib/exercises-data.js). */
+export function fromExdb(e: Exdb): DbExercise | null {
+  return fromCatalogue({ id: e.id, name: e.n, target: e.tg, secondaryMuscles: e.sm, equipment: e.eq, category: e.cat });
+}

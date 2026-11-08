@@ -12,7 +12,7 @@ globalThis.IS_REACT_ACT_ENVIRONMENT = true
 vi.hoisted(() => { vi.stubEnv('VITE_CLIP_EXT', 'webp') })
 const mocks = vi.hoisted(() => ({
   MOBILE: true, available: true, ready: new Set(), downloads: [], sheets: [], writes: 0,
-  S: { gifSize: 'full', exFigure: 'female', workouts: [{ id: 'w1', entries: [{ id: '0001' }] }] },
+  S: { gifSize: 'full', exStyle: 'photo', exFigure: 'female', workouts: [{ id: 'w1', entries: [{ id: '0001' }] }] },
 }))
 vi.mock('../lib/mobile.js', () => ({ get MOBILE() { return mocks.MOBILE } }))
 vi.mock('../store/useStore.js', () => {
@@ -58,7 +58,7 @@ const fire = (el, type) => act(() => { el.dispatchEvent(new Event(type)) })
 beforeEach(async () => {
   localStorage.clear()
   Object.assign(mocks, { MOBILE: true, available: true, ready: new Set(), downloads: [], sheets: [], writes: 0 })
-  mocks.S = { gifSize: 'full', exFigure: 'female', workouts: [{ id: 'w1', entries: [{ id: '0001' }] }] }
+  mocks.S = { gifSize: 'full', exStyle: 'photo', exFigure: 'female', workouts: [{ id: 'w1', entries: [{ id: '0001' }] }] }
   packs._resetAnimPacks()
   host = document.createElement('div')
   document.body.appendChild(host)

@@ -8,7 +8,7 @@ import { createMediaStore, memoryBackend, _setMediaStore } from '../lib/media-st
 globalThis.IS_REACT_ACT_ENVIRONMENT = true
 
 const mocks = vi.hoisted(() => {
-  const state = { S: { gifSize: 'full' } }
+  const state = { S: { gifSize: 'full', exStyle: 'photo' } }
   state.snapshot = () => ({
     S: state.S,
     update: mut => {
@@ -29,7 +29,7 @@ const EX = { id: 'bench', n: 'bench press', gif: 'bench.gif', img: 'bench.jpg' }
 
 let host, root
 beforeEach(() => {
-  mocks.S = { gifSize: 'full' }
+  mocks.S = { gifSize: 'full', exStyle: 'photo' }
   host = document.createElement('div')
   document.body.appendChild(host)
   root = createRoot(host)
@@ -53,7 +53,7 @@ describe('Media gifSize', () => {
   })
 
   it("renders nothing at all in the workout when gifSize is 'off'", () => {
-    mocks.S = { gifSize: 'off' }
+    mocks.S = { gifSize: 'off', exStyle: 'photo' }
     mount({ minimizable: true })
     expect(host.querySelector('.exmedia')).toBeFalsy()
     expect(host.querySelector('img')).toBeFalsy()
@@ -61,13 +61,13 @@ describe('Media gifSize', () => {
   })
 
   it("'off' only applies to the workout — the detail sheet (not minimizable) still shows media", () => {
-    mocks.S = { gifSize: 'off' }
+    mocks.S = { gifSize: 'off', exStyle: 'photo' }
     mount({})
     expect(host.querySelector('.exmedia img')).toBeTruthy()
   })
 
   it('treats a legacy/unknown value as full', () => {
-    mocks.S = { gifSize: 'huge' }
+    mocks.S = { gifSize: 'huge', exStyle: 'photo' }
     mount({ minimizable: true })
     expect(host.querySelector('.exmedia img')).toBeTruthy()
     expect(host.querySelector('.exmedia.mini')).toBeFalsy()
@@ -143,12 +143,12 @@ describe('Media — a custom exercise', () => {
 
   it('does not play by itself in the workout\'s list layout, nor under reduced motion', async () => {
     await holding(MAIN, POSTER)
-    mocks.S = { gifSize: 'full', workoutView: 'list' }
+    mocks.S = { gifSize: 'full', exStyle: 'photo', workoutView: 'list' }
     await mountCustom(custom({ media: clip(8) }), { minimizable: true })
     expect(HTMLMediaElement.prototype.play).not.toHaveBeenCalled()
     expect(host.querySelector('.gifhint').textContent).toContain('tap to play')
     act(() => root.render(<div />))
-    mocks.S = { gifSize: 'full' }
+    mocks.S = { gifSize: 'full', exStyle: 'photo' }
     window.matchMedia = q => ({ matches: q.includes('reduce'), addEventListener() {}, removeEventListener() {} })
     await mountCustom(custom({ media: clip(8) }))
     expect(HTMLMediaElement.prototype.play).not.toHaveBeenCalled()
@@ -238,7 +238,7 @@ describe('Media — a custom exercise', () => {
 
   it("follows gifSize in the workout: nothing when 'off', the mini box when 'mini'", async () => {
     await holding(MAIN, POSTER)
-    mocks.S = { gifSize: 'off' }
+    mocks.S = { gifSize: 'off', exStyle: 'photo' }
     await mountCustom(custom({ media: image, url: 'https://youtu.be/x' }), { minimizable: true })
     expect(host.innerHTML).toBe('')
     mocks.S = { gifSize: 'mini' }
