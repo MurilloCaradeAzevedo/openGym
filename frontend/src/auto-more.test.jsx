@@ -25,6 +25,18 @@ class FakeIntersectionObserver {
 // The button scrolls into the observed band: every live observer reports what it watches.
 const comeIntoView = () => act(() => observers.forEach(o => o.els.size && o.cb([...o.els].map(target => ({ target, isIntersecting: true })))))
 
+// The library opens on its shelves: open "All" to read the list, and pick() opens a body-part shelf.
+const openAll = host => { const a = host.querySelector('.shelf-all'); if (a) act(() => a.click()); return host }
+
+const pick = (host, text) => {
+  const c = [...host.querySelectorAll('.chips .chip')].find(b => b.textContent.trim() === text)
+  if (c) { act(() => c.click()); return }
+  const back = host.querySelector('.back-link')
+  if (back) act(() => back.click())
+  const s = [...host.querySelectorAll('.shelf')].find(b => b.querySelector('.shelf-t')?.textContent.trim() === text)
+  act(() => s.click())
+}
+
 const mounted = []
 function render(node) {
   const host = document.createElement('div')
@@ -32,7 +44,7 @@ function render(node) {
   const root = createRoot(host)
   mounted.push(root)
   act(() => root.render(node))
-  return host
+  return openAll(host)
 }
 function renderTop() {
   const sheet = useUI.getState().sheets.at(-1)
@@ -89,7 +101,7 @@ describe('lists load their next page as you scroll', () => {
     const count = bp => EXDB.filter(e => e.bp === bp).length
     const bp = BODYPARTS.filter(b => count(b) > 40).sort((a, b) => count(a) - count(b))[0]
     const host = render(<Library />)
-    act(() => [...host.querySelectorAll('.chips .chip')].find(c => c.textContent === bp).click())
+    pick(host, bp)
     for (let i = 0; i < 10 && showMore(host); i++) comeIntoView()
     expect(rows(host)).toBe(count(bp))
     expect(showMore(host)).toBeUndefined()

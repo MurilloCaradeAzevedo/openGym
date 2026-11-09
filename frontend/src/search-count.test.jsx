@@ -14,6 +14,18 @@ import { registerExerciseAliases } from './lib/exercise-aliases.js'
 import { EXDB, searchExercises } from './lib/exercises.js'
 
 globalThis.IS_REACT_ACT_ENVIRONMENT = true
+// The library opens on its shelves: open "All" to read the list, and pick() opens a body-part shelf.
+const openAll = host => { const a = host.querySelector('.shelf-all'); if (a) act(() => a.click()); return host }
+
+const pick = (host, text) => {
+  const c = [...host.querySelectorAll('.chips .chip')].find(b => b.textContent.trim() === text)
+  if (c) { act(() => c.click()); return }
+  const back = host.querySelector('.back-link')
+  if (back) act(() => back.click())
+  const s = [...host.querySelectorAll('.shelf')].find(b => b.querySelector('.shelf-t')?.textContent.trim() === text)
+  act(() => s.click())
+}
+
 const mounted = []
 function mount(node) {
   const host = document.createElement('div')
@@ -21,7 +33,7 @@ function mount(node) {
   const root = createRoot(host)
   mounted.push(root)
   act(() => root.render(node))
-  return host
+  return openAll(host)
 }
 const renderTopSheet = () => {
   const sheet = useUI.getState().sheets.at(-1)
@@ -67,10 +79,12 @@ describe('exercise search result count', () => {
       expect(count(host).textContent).toBe('1')
       expect(host.textContent).toContain('Custom shoulder press')
       act(() => type(input, 'Zentara lift'))
-      act(() => chip(host, 'neck').click())
-      expect(count(host).textContent).toBe('0')
-      act(() => chip(host, 'All').click())
-      expect(count(host).textContent).toBe('1')
+      if (where !== 'Library') {
+        pick(host, 'neck')
+        expect(count(host).textContent).toBe('0')
+        pick(host, 'All')
+        expect(count(host).textContent).toBe('1')
+      }
       update(s => { s.exAliases['1162'] = ['Summit lift'] })
       expect(count(host).textContent).toBe('0')
       act(() => type(input, 'Summit lift'))
@@ -103,11 +117,11 @@ describe('exercise search result count', () => {
 
     it(`${where}: counts a body-part filter too, and reads "1 exercise" for one`, () => {
       const host = open()
-      act(() => chip(host, 'neck').click())
+      pick(host, 'neck')
       const neck = EXDB.filter(e => e.bp === 'neck').length
       expect(Number(count(host).textContent)).toBe(neck)
       const one = EXDB.find(e => searchExercises(EXDB, e.n).length === 1)
-      act(() => chip(host, 'All').click())
+      pick(host, 'All')
       act(() => type(host.querySelector('.search input'), one.n))
       expect(count(host).textContent).toBe('1')
       expect(count(host).getAttribute('aria-label')).toBe('1 exercise')

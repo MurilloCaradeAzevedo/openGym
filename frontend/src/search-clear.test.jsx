@@ -13,6 +13,18 @@ import Library from './views/Library.jsx'
 import { EXDB } from './lib/exercises.js'
 
 globalThis.IS_REACT_ACT_ENVIRONMENT = true
+// The library opens on its shelves: open "All" to read the list, and pick() opens a body-part shelf.
+const openAll = host => { const a = host.querySelector('.shelf-all'); if (a) act(() => a.click()); return host }
+
+const pick = (host, text) => {
+  const c = [...host.querySelectorAll('.chips .chip')].find(b => b.textContent.trim() === text)
+  if (c) { act(() => c.click()); return }
+  const back = host.querySelector('.back-link')
+  if (back) act(() => back.click())
+  const s = [...host.querySelectorAll('.shelf')].find(b => b.querySelector('.shelf-t')?.textContent.trim() === text)
+  act(() => s.click())
+}
+
 const mounted = []
 function mount(node) {
   const host = document.createElement('div')
@@ -20,7 +32,7 @@ function mount(node) {
   const root = createRoot(host)
   mounted.push(root)
   act(() => root.render(node))
-  return host
+  return openAll(host)
 }
 const renderTopSheet = () => {
   const sheet = useUI.getState().sheets.at(-1)
@@ -62,7 +74,7 @@ describe('exercise search clear button', () => {
 
     it(`${where}: clears only the text; a body-part filter keeps its count`, () => {
       const host = open()
-      act(() => chip(host, 'neck').click())
+      pick(host, 'neck')
       act(() => type(host.querySelector('.search input'), 'stretch'))
       act(() => clear(host).click())
       expect(host.querySelector('.search input').value).toBe('')
