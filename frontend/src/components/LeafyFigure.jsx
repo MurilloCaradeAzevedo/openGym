@@ -52,12 +52,12 @@ function Shape({ s, dark }) {
   return <polygon points={s.pts.map(q => q.join(',')).join(' ')} fill={color} stroke={color} strokeWidth="5" strokeLinejoin="round" opacity={op} />
 }
 
-/** The drawing for an exercise, or null when its movement was only guessed (from the muscle or
- *  the category, not the name): a wrong animation teaches the wrong thing, so none is shown. */
+/** The drawing for an exercise: every one gets a pose, read from its name or, failing that, from
+ *  the posture its name describes (lib/leafy/figure/classify.ts). Null only without data. */
 export function leafyFigureFor(ex) {
   const d = fromExdb(ex)
   const fig = d && classify(d)
-  return fig && fig.reason === 'name' ? fig : null
+  return fig || null
 }
 
 export default function LeafyFigure({ ex, id, compact, paused }) {

@@ -22,6 +22,8 @@ export type Template = {
   spread?: { arm?: [number, number]; leg?: [number, number] };
   /** Camera angle that shows the movement best (3D), degrees around the body: 0 side, 90 front. */
   yaw?: number;
+  /** The whole body turned onto its side, in degrees around its long axis (3D): a side plank. */
+  roll?: number;
 };
 
 export type Hold = 'side' | 'front' | 'back' | 'frontRack' | 'chest' | 'overhead' | 'hips' | 'head' | 'cross' | 'push';
@@ -103,7 +105,7 @@ export const TEMPLATES = {
   lateralRaise: { upper: true, yaw: 80, spread: { arm: [4, 86] }, frames: pair(STAND, { arm: 90, fore: 88 }, { arm: 90, fore: 86 }) },
   press: { upper: true, frames: pair(STAND, { handT: [11, 3], bendArm: -1 }, { handT: [2, 52], bendArm: -1 }) },
   curl: { upper: true, cable: 'low', frames: pair(STAND, { arm: 92, fore: 92 }, { arm: 85, fore: -70 }) },
-  wrist: { upper: true, frames: pair(SEAT, { arm: 90, fore: -12 }, { arm: 90, fore: 12 }) },
+  wrist: { upper: true, stage: 'seat', frames: pair(SEAT, { arm: 90, fore: -12 }, { arm: 90, fore: 12 }) },
   triExt: { upper: true, frames: pair(STAND, { arm: -80, fore: -80 }, { arm: -80, fore: 100 }) },
   pushdown: { cable: 'high', frames: pair(STAND, { arm: 95, fore: -20 }, { arm: 95, fore: 90 }) },
   kickback: { frames: pair(BENT, { arm: 180, fore: 90 }, { arm: 180, fore: 180 }) },
@@ -130,6 +132,26 @@ export const TEMPLATES = {
     still: true,
     frames: pair(f(PLANK, { torso: -8, thigh: 172, shin: 172, foot: 115, hand: [198, 186] }), {}, { torso: -10, thigh: 170 }),
   },
+  sidePlank: {
+    still: true, roll: 90, yaw: 15,
+    frames: pair(f(PLANK, { torso: -8, thigh: 172, shin: 172, foot: 115, hand: [198, 186] }), {}, { torso: -11, thigh: 169 }),
+  },
+  invertedRow: {
+    stage: 'bar', yaw: 25,
+    frames: pair({ anchor: 'toe', at: [40, 189], torso: -25, thigh: 155, shin: 155, foot: 100, hand: [170, 72] }, {}, { torso: -30, thigh: 150, shin: 150 }),
+  },
+  jack: {
+    yaw: 85, spread: { arm: [0, 165], leg: [0, 22] },
+    frames: pair(STAND, { arm: 90, fore: 90 }, { arm: 90, fore: 90 }),
+  },
+  deadBug: {
+    yaw: 30,
+    frames: pair(
+      { anchor: 'hip', at: [120, 178], torso: 180, thigh: -90, shin: 0, foot: -80, thighB: -90, shinB: 0, footB: -80, handT: [52, 0] },
+      {},
+      { thigh: -15, shin: -15, handT: [12, 48] },
+    ),
+  },
   climber: {
     frames: pair(
       { anchor: 'hip', at: [125, 151], torso: -18, thigh: 162, shin: 162, foot: 120, ankle: [50, 177], thighB: 162, shinB: 162, footB: 120, hand: [172, 186] },
@@ -138,6 +160,56 @@ export const TEMPLATES = {
     ),
   },
   quadKick: { frames: pair(QUAD, {}, { thigh: 175, shin: 170 }) },
+  // Postures read from the name (classify.ts), for stretches, yoga, mobility and drills.
+  kneelingLunge: {
+    still: true, yaw: 20,
+    frames: pair(f(STAND, { at: [130, 185], thigh: 10, shin: 95, thighB: 105, shinB: 180, footB: 180, arm: 90, fore: 90 }), { torso: -88 }, { torso: -96 }),
+  },
+  staggerStretch: {
+    still: true, yaw: 20,
+    frames: pair(f(STAND, { thigh: 80, shin: 95, ankleB: [80, 183], footB: 0, handT: [40, 2] }), { torso: -75 }, { torso: -70 }),
+  },
+  downDog: {
+    yaw: 15,
+    frames: pair({ anchor: 'feet', at: [60, 185], torso: 50, thigh: 125, shin: 125, foot: 0, hand: [170, 186] }, {}, { torso: 56, thigh: 120, shin: 122 }),
+  },
+  childPose: {
+    still: true, yaw: 20,
+    frames: pair({ anchor: 'hip', at: [100, 168], torso: -5, neck: 10, thigh: 10, shin: 180, foot: 180, hand: [205, 186] }, {}, { torso: 0 }),
+  },
+  cobra: {
+    yaw: 25,
+    frames: pair({ anchor: 'hip', at: [110, 180], torso: -20, thigh: 180, shin: 180, foot: 170, hand: [150, 186] }, {}, { torso: -32 }),
+  },
+  catCow: { yaw: 15, frames: pair(QUAD, { torso: 6, neck: 35 }, { torso: -6, neck: -25 }) },
+  butterfly: {
+    yaw: 80, spread: { leg: [55, 62] },
+    frames: pair({ anchor: 'hip', at: [100, 178], torso: -90, thigh: -10, shin: 165, foot: 180, handT: [30, -40] }, {}, { torso: -70 }),
+  },
+  sideLying: {
+    roll: 90, yaw: 10, spread: { leg: [0, 35] },
+    frames: pair({ anchor: 'hip', at: [120, 178], torso: 180, thigh: 0, shin: 0, foot: -80, arm: 0, fore: 0 }, {}, {}),
+  },
+  kick: {
+    yaw: 25,
+    frames: pair({ anchor: 'hip', at: [112, 103], torso: -90, thigh: 90, shin: 90, foot: 0, thighB: 90, shinB: 90, footB: 0, handT: [14, -8] }, {}, { thigh: -5, shin: -5 }),
+  },
+  punch: { yaw: 25, frames: pair(f(STAND, { torso: -85 }), { handT: [14, 2] }, { handT: [52, 4] }) },
+  hipExtStand: {
+    yaw: 15,
+    frames: pair({ anchor: 'hip', at: [112, 103], torso: -88, thigh: 90, shin: 90, foot: 0, thighB: 90, shinB: 90, footB: 0, handT: [4, -42] }, {}, { thigh: 125, shin: 110 }),
+  },
+  kneeRaiseStand: {
+    yaw: 25,
+    frames: pair({ anchor: 'hip', at: [112, 103], torso: -90, thigh: 90, shin: 90, foot: 0, thighB: 90, shinB: 90, footB: 0, handT: [4, -42] }, {}, { thigh: -5, shin: 90 }),
+  },
+  legSwing: {
+    yaw: 15,
+    frames: pair({ anchor: 'hip', at: [112, 103], torso: -90, thigh: 135, shin: 135, foot: 0, thighB: 90, shinB: 90, footB: 0, handT: [4, -42] }, {}, { thigh: 35, shin: 35, foot: -40 }),
+  },
+  armCircle: { upper: true, yaw: 80, spread: { arm: [70, 110] }, frames: pair(STAND, { arm: 90, fore: 90 }, { arm: 90, fore: 90 }) },
+  wideSquat: { hold: true, yaw: 70, spread: { leg: [22, 32] }, frames: pair(STAND, {}, { torso: -60, thigh: 0, shin: 100 }) },
+  deadHang: { stage: 'bar', noGround: true, still: true, frames: pair(f(HANG, { thigh: 90, shin: 90, foot: 0 }), {}, {}) },
   jump: {
     frames: pair(STAND, { torso: -55, thigh: 10, shin: 105, arm: 150, fore: 150 }, { at: [112, 158], arm: -30, fore: -30, foot: 30 }),
   },
@@ -190,8 +262,9 @@ export const TEMPLATES = {
       { at: [125, 166], hand: [60, 186] },
     ),
   },
-  fold: { frames: pair(STAND, { torso: -85, hand: [116, 110] }, { torso: 75, hand: [126, 182] }) },
+  fold: { yaw: 10, frames: pair(STAND, { torso: -85, hand: [116, 110] }, { torso: 75, hand: [126, 182] }) },
   seatedFold: {
+    yaw: 15,
     frames: pair(
       { anchor: 'hip', at: [80, 178], torso: -90, thigh: 0, shin: 0, foot: -80 },
       { hand: [84, 76] },

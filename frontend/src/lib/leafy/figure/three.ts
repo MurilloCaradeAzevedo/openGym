@@ -129,7 +129,16 @@ export function scene3At(fig: Figure, cycle: number, yaw = defaultYaw(fig), focu
   const J = evaluate(blend(fa, fb, u));
   const spread = { arm: lerp(t.spread?.arm?.[0] ?? 0, t.spread?.arm?.[1] ?? 0, u), leg: lerp(t.spread?.leg?.[0] ?? 0, t.spread?.leg?.[1] ?? 0, u) };
   const B = lift3(J, spread);
-  const cam = camera(yaw);
+  const view = camera(yaw);
+  // A side-lying pose (side plank): everything turns around the body's long axis, at mid height.
+  const rollAng = ((t.roll ?? 0) * Math.PI) / 180;
+  const roll = (p: V3): V3 => (rollAng
+    ? [p[0], 20 + (p[1] - 20) * Math.cos(rollAng) - p[2] * Math.sin(rollAng), (p[1] - 20) * Math.sin(rollAng) + p[2] * Math.cos(rollAng)]
+    : p);
+  const turnN = (n: V3): V3 => (rollAng
+    ? [n[0], n[1] * Math.cos(rollAng) - n[2] * Math.sin(rollAng), n[1] * Math.sin(rollAng) + n[2] * Math.cos(rollAng)]
+    : n);
+  const cam = { proj: (p: V3) => view.proj(roll(p)), depth: (p: V3) => view.depth(roll(p)), faces: (n: V3) => view.faces(turnN(n)) };
   const items: { d: number; s: Shape3 }[] = [];
   const k = (d: number) => Math.max(0, Math.min(1, (d + 45) / 90));
   const line = (a: V3, b: V3, w: number, role: Role, bias = 0, op?: number) => {
@@ -150,8 +159,8 @@ export function scene3At(fig: Figure, cycle: number, yaw = defaultYaw(fig), focu
   // Floor grid, behind everything.
   const floor: Shape3[] = [];
   if (!t.noGround) {
-    for (let x = -90; x <= 110; x += 40) floor.push({ t: 'line', a: cam.proj([x, 0, -60]), b: cam.proj([x, 0, 60]), w: 1, role: 'floor', k: 0 });
-    for (let z = -60; z <= 60; z += 30) floor.push({ t: 'line', a: cam.proj([-90, 0, z]), b: cam.proj([110, 0, z]), w: 1, role: 'floor', k: 0 });
+    for (let x = -90; x <= 110; x += 40) floor.push({ t: 'line', a: view.proj([x, 0, -60]), b: view.proj([x, 0, 60]), w: 1, role: 'floor', k: 0 });
+    for (let z = -60; z <= 60; z += 30) floor.push({ t: 'line', a: view.proj([-90, 0, z]), b: view.proj([110, 0, z]), w: 1, role: 'floor', k: 0 });
   }
 
   // Body.
@@ -190,7 +199,8 @@ export function scene3At(fig: Figure, cycle: number, yaw = defaultYaw(fig), focu
       const p2: V = [-d2[1] / l2, d2[0] / l2];
       const pt = (tt: number): V => [a2[0] + d2[0] * tt + p2[0] * ms.o, a2[1] + d2[1] * tt + p2[1] * ms.o];
       const normal: V3 = [p2[0] * Math.sign(ms.o), -p2[1] * Math.sign(ms.o), 0];
-      if (ms.o !== 0 && !cam.faces(normal)) continue;
+      // Limbs are thin, so a muscle on the far face of one still reads; only the torso hides its back.
+      if (ms.o !== 0 && (ms.seg === 'torso' || ms.seg === 'neck') && !cam.faces(normal)) continue;
       const z = side === 'R' ? 1 : -1;
       if (ms.seg === 'torso' || ms.seg === 'neck') {
         if (ms.seg === 'neck' && side === 'L') continue;
