@@ -1,9 +1,11 @@
 name: Deploy
 
 # After main's images are published (docker-publish.yml), and only when the tests of that same
-# commit passed (test.yml), the production server pulls them and restarts. Skipped until the
-# repository has the DEPLOY_HOST, DEPLOY_USER and DEPLOY_SSH_KEY secrets (and the DEPLOY_DOMAIN
-# variable for the health check), and on any repository other than the fork it was written for.
+# commit passed (test.yml), the production server checks out that commit and runs the images
+# tagged sha-<commit>. Skipped until the repository has the DEPLOY_HOST, DEPLOY_USER and
+# DEPLOY_SSH_KEY secrets (DEPLOY_KNOWN_HOSTS is then required too, and the DEPLOY_DOMAIN variable
+# enables the health check), and on any repository other than the fork it was written for.
+# A manual run deploys the head of the chosen branch, whose images must already be published.
 on:
   workflow_run:
     workflows: ["Publish Docker images"]
@@ -50,20 +52,26 @@ jobs:
           done
           echo "::error::Tests for $SHA did not finish in 20 minutes; not deploying."; exit 1
 
-      - name: Pull and restart on the server
+      - name: Deploy this commit on the server
         if: env.HAS_SECRETS == 'true'
         env:
           HOST: ${{ secrets.DEPLOY_HOST }}
           USER: ${{ secrets.DEPLOY_USER || 'ubuntu' }}
           KEY: ${{ secrets.DEPLOY_SSH_KEY }}
+          # The server's public host key line(s), taken once by the owner and checked against the
+          # server's own fingerprint (deploy/README.md). Never learned during the run.
+          KNOWN_HOSTS: ${{ secrets.DEPLOY_KNOWN_HOSTS }}
+        # /usr/local/sbin/opengym-deploy (installed root-owned by setup-server.sh) checks out exactly
+        # $SHA and starts the images tagged sha-$SHA, never :edge.
         run: |
+          [[ "$SHA" =~ ^[0-9a-f]{40}$ ]] || { echo "::error::Unexpected commit id"; exit 1; }
+          [ -n "$KNOWN_HOSTS" ] || { echo "::error::The DEPLOY_KNOWN_HOSTS secret is missing; not deploying."; exit 1; }
           install -m 700 -d ~/.ssh
           printf '%s\n' "$KEY" > ~/.ssh/deploy && chmod 600 ~/.ssh/deploy
-          ssh-keyscan -T 10 "$HOST" >> ~/.ssh/known_hosts 2>/dev/null
-          ssh -i ~/.ssh/deploy "$USER@$HOST" 'set -e; cd ~/opengym
-            git fetch --depth 1 origin main && git reset --hard FETCH_HEAD
-            C="sudo docker compose -f docker-compose.yml -f deploy/compose.prod.yml"
-            $C pull && $C up -d --remove-orphans && sudo docker image prune -f >/dev/null'
+          printf '%s\n' "$KNOWN_HOSTS" > ~/.ssh/known_hosts && chmod 644 ~/.ssh/known_hosts
+          ssh -i ~/.ssh/deploy -o IdentitiesOnly=yes -o BatchMode=yes \
+            -o StrictHostKeyChecking=yes -o UserKnownHostsFile="$HOME/.ssh/known_hosts" \
+            "$USER@$HOST" "sudo /usr/local/sbin/opengym-deploy $SHA"
 
       - name: Health check
         if: env.HAS_SECRETS == 'true' && vars.DEPLOY_DOMAIN != ''

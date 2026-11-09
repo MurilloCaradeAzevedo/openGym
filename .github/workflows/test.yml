@@ -49,6 +49,9 @@ jobs:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           persist-credentials: false
+      # Every change, whatever its paths: a key or a .env file must never reach the repository.
+      - name: No secrets in the tree
+        run: node scripts/check-secrets.mjs --all
       - uses: dorny/paths-filter@ceb8a2b8f2d89434be7ff52d3de7ec3738c5cc9d # v4.0.3
         id: f
         with:

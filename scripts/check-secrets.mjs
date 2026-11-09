@@ -13,11 +13,14 @@ export const PATTERNS = [
   ['AWS access key', /\bAKIA[0-9A-Z]{16}\b/],
   ['DuckDNS token in a URL', /duckdns\.org\/update\?[^\s"']*token=[0-9a-f-]{20,}/i],
   ['secret assigned in a file', /^\s*(export\s+)?[A-Z0-9_]*(SECRET|TOKEN|PASSWORD|API_KEY|PRIVATE_KEY)[A-Z0-9_]*\s*=\s*["']?(?!\$|<|your|change|example|xxx|\*|["']?\s*$)[A-Za-z0-9+/_=.-]{16,}/m],
+  ['secret in a JSON value', /"(token|secret|password|api_?key)"\s*:\s*"(?!\$|<|your|change|example|xxx|\*)[A-Za-z0-9+/_=.-]{16,}/i],
 ]
 
 // Files that should never be tracked, whatever they contain.
 export const FORBIDDEN_FILES = [
   /(^|\/)\.env($|\.(?!example|sample))/,
+  // prod.env, server.env... (any prefix), unless the name says it is an example.
+  /(^|\/)(?![^/]*(example|sample))[^/]+\.env$/i,
   /\.(keystore|jks|p12|pfx|pem|key)$/i,
   /(^|\/)(google-services\.json|GoogleService-Info\.plist)$/,
   /(^|\/)(keystore-password|dev-test-accounts)\b/,
@@ -43,7 +46,7 @@ const git = (...a) => execFileSync('git', a, { encoding: 'utf8', maxBuffer: 1 <<
 
 function main() {
   const all = process.argv.includes('--all')
-  const files = (all ? git('ls-files', '-z') : git('diff', '--cached', '--name-only', '--diff-filter=ACM', '-z'))
+  const files = (all ? git('ls-files', '-z') : git('diff', '--cached', '--name-only', '--diff-filter=ACMR', '-z'))
     .split('\0').filter(Boolean)
   const findings = []
   for (const f of files) {
