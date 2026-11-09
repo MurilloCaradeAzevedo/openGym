@@ -23,9 +23,10 @@ export default function Library() {
   const [bp, setBp] = useState('')
   const [eq, setEq] = useState('')
   const [cat, setCat] = useState('')
+  const [all, setAll] = useState(false)          // the "All exercises" shelf
   const [showAll, setShowAll] = useState(false)   // ignore the active equipment profile for this session
   const [shown, setShown] = useState(40)
-  const bpStrip = useRef(null), eqStrip = useRef(null), catStrip = useRef(null)
+  const eqStrip = useRef(null)
   const moreRef = useAutoMore(() => setShown(s => s + 40))
   const profile = activeProfile(S)
   // Your own exercises, counted the way the list below shows them (allExercises puts every
@@ -34,7 +35,7 @@ export default function Library() {
   const inPart = searchExercises(allExercises(S).filter(e => !bp || e.bp === bp), q)
   // Kind of exercise (strength, stretching, cardio...), the same fallback as equipment below: a
   // choice the search or body part has narrowed away is ignored for now, never a dead end.
-  const { opts: catOpts, on: catOn, list: base } = byCategory(inPart, cat)
+  const { on: catOn, list: base } = byCategory(inPart, cat)
   const eqFiltered = (profile && !showAll) ? base.filter(e => exAvailable(S, e)) : base
   const eqOpts = equipmentOf(eqFiltered)
   // Drop the equipment filter if the search narrowed it away, so you never hit a dead end.
@@ -44,9 +45,7 @@ export default function Library() {
   const narrowedList = eqOn ? eqFiltered.filter(e => e.eq === eqOn) : eqFiltered
   const usage = useMemo(() => (q.trim() ? usageOf(S) : null), [q, S.routines, S.workouts])
   const f = usage ? sortYoursFirst(narrowedList, S, usage) : sortFavouritesFirst(narrowedList, S)
-  useRevealActiveChip(bpStrip, bp)
   useRevealActiveChip(eqStrip, eqOn)
-  useRevealActiveChip(catStrip, catOn)
   // A live count at the end of the search field while a search or filter narrows the list
   // (idea and first version: GitLab !31) — how many are left, before scrolling to find out.
   const narrowed = !!(q.trim() || bp || eqOn || catOn)
@@ -57,6 +56,16 @@ export default function Library() {
   const similar = q.trim() && qLate === q && f.length <= shown
     ? similarExercises(allExercises(S).filter(e => (!bp || e.bp === bp) && (!profile || showAll || exAvailable(S, e))), q, f, f.length ? 12 : 30)
     : []
+  // Browsing starts from the body parts, like a library's shelves, instead of 5,632 rows and three
+  // rows of filters at once (Leafy design pass). A search or a chosen shelf shows the list.
+  const browsing = !q.trim() && !bp && !cat && !all
+  const counts = useMemo(() => {
+    const m = {}
+    for (const e of allExercises(S)) m[e.bp] = (m[e.bp] || 0) + 1
+    m.stretching = byCategory(allExercises(S), 'stretching').list.length
+    return m
+  }, [S.customEx])
+  const openShelf = (b, c = '', everything = false) => { setBp(b); setCat(c); setAll(everything); setEq(''); setShown(40) }
   const row = e => {
     const best = bestWeightFor(S, e.id)
     return <div key={e.id} className="item" {...tappable(() => exerciseDetailSheet(e))}>
@@ -86,32 +95,32 @@ export default function Library() {
         {showAll ? t('Filter by "{0}"', profile.name) : t('Show all equipment')}
       </button>
     </div>}
-    {/* Changing body part keeps the equipment filter (issue #71): the eqOn fallback above drops
-        it only for the current view if the new body part has nothing under it, without forgetting
-        the choice. "All" clears it, since it spans every body part. */}
-    <div className="chips" ref={bpStrip} style={{ marginBottom: eqOpts.length > 1 || catOpts.length > 1 ? 8 : 12 }}>
-      <button className={'chip nocap' + (!bp ? ' on' : '')} onClick={() => { setBp(''); setEq(''); setShown(40) }}>{t('All')}</button>
-      {BODYPARTS.map(b => <button key={b} className={'chip' + (bp === b ? ' on' : '')} onClick={() => { setBp(b); setShown(40) }}>{t(b)}</button>)}
-    </div>
-    {catOpts.length > 1 && <div className="chips" ref={catStrip} style={{ marginBottom: 8 }}>
-      <button className={'chip nocap' + (!catOn ? ' on' : '')} onClick={() => { setCat(''); setShown(40) }}>{t('Any type')}</button>
-      {catOpts.map(x => <button key={x} className={'chip' + (catOn === x ? ' on' : '')} onClick={() => { setCat(x); setShown(40) }}>{t(x)}</button>)}
+    {browsing ? <div className="shelves">
+      <button className="shelf shelf-all" onClick={() => openShelf('', '', true)}>
+        <span className="shelf-t">{t('All')}</span><span className="shelf-n">{exCount(allExercises(S).length)}</span></button>
+      {BODYPARTS.map(b => <button key={b} className="shelf" onClick={() => openShelf(b)}>
+        <span className="shelf-t sentence">{t(b)}</span><span className="shelf-n">{exCount(counts[b] || 0)}</span></button>)}
+      <button className="shelf" onClick={() => openShelf('', 'stretching')}>
+        <span className="shelf-t sentence">{t('stretching')}</span><span className="shelf-n">{exCount(counts.stretching || 0)}</span></button>
+    </div> : (bp || cat || all) && <div className="shelf-head">
+      <button className="back-link" onClick={() => openShelf('')}><Icon name="chevronLeft" />{t('Exercises')}</button>
+      <h2 className="sentence">{bp || cat ? t(bp || cat) : t('All')}</h2>
     </div>}
-    {eqOpts.length > 1 && <div className="chips" ref={eqStrip} style={{ marginBottom: 12 }}>
+    {!browsing && eqOpts.length > 1 && <div className="chips" ref={eqStrip} style={{ marginBottom: 12 }}>
       <button className={'chip nocap' + (!eqOn ? ' on' : '')} onClick={() => { setEq(''); setShown(40) }}>{t('Any equipment')}</button>
       {eqOpts.map(x => <button key={x} className={'chip' + (eqOn === x ? ' on' : '')} onClick={() => { setEq(x); setShown(40) }}>{t(x)}</button>)}
     </div>}
-    <div className={'list' + (S.exerciseView === 'cards' ? ' ex-grid' : '')}>
+    <div className={'list' + (S.exerciseView === 'cards' ? ' ex-grid' : '')} style={browsing ? { marginTop: 16 } : undefined}>
       <div className="item ex-new" {...tappable(() => customExSheet(null, ex => exerciseDetailSheet(ex), q.trim()))}>
         <div className="thumb thumb-x"><Icon name="plusCircle" /></div>
         <div className="grow"><div className="tt">{t('Create your own exercise')}</div><div className="ss">{t('name + body part, and a photo or video if you like')}</div></div><Icon name="plus" className="chev" />
       </div>
-      {f.slice(0, shown).map(row)}
-      {f.length === 0 && !similar.length && <div className="empty"><div className="ico"><Icon name="magnifier" /></div>{t('No match')}</div>}
+      {!browsing && f.slice(0, shown).map(row)}
+      {!browsing && f.length === 0 && !similar.length && <div className="empty"><div className="ico"><Icon name="magnifier" /></div>{t('No match')}</div>}
       {similar.length > 0 && <h4 className="sec similar-label">{f.length ? t('Similar exercises') : t('No exact match. These come close:')}</h4>}
       {similar.map(row)}
     </div>
-    {f.length > shown && <><div style={{ height: 10 }} /><Button ref={moreRef} onClick={() => setShown(s => s + 40)}>{t('Show more')}</Button></>}
+    {!browsing && f.length > shown && <><div style={{ height: 10 }} /><Button ref={moreRef} onClick={() => setShown(s => s + 40)}>{t('Show more')}</Button></>}
   </>
 }
 

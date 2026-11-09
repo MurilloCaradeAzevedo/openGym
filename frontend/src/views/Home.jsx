@@ -1,9 +1,8 @@
-import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useStore } from '../store/useStore.js'
 import { effectiveRoutines, effectiveRoutineIds, nextTrainingDay, streakWeeks, lastBW, setsDoneActive } from '../lib/history.js'
-import { fmtNum, fmtDate, todayISO, isoOf, weekStartOf, weekDayOffset, DAYS, DAYN } from '../lib/format.js'
-import { t, tn, dateLocale } from '../lib/i18n.js'
+import { fmtNum, fmtDate, todayISO, DAYN } from '../lib/format.js'
+import { t, tn } from '../lib/i18n.js'
 import { bwSheet, goalSheet, dayOverrideSheet, calendarSheet, startFlow, starterPlanSheet, bwDeltaColor, weighInsSheet } from '../sheets.jsx'
 import LineChart from '../components/LineChart.jsx'
 import Icon from '../components/Icon.jsx'
@@ -15,7 +14,6 @@ import { useConnectionTrouble } from '../components/SyncBanner.jsx'
 import { Button } from '../components/ui.jsx'
 import { tappable } from '../lib/use-sheet-keyboard.js'
 import { glyphOf } from '../lib/glyphs.js'
-import { dayNoteOf } from '../lib/day-notes.js'
 import { weighInAt } from '../lib/bodyweight.js'
 import WeightRate from '../components/WeightRate.jsx'
 import { SeasonDeco } from '../components/Seasonal.jsx'
@@ -30,21 +28,19 @@ function FoodToday({ S, nav }) {
   const total = dayTotals(S.food, todayISO())
   const goal = S.foodTargets?.kcal
   const pct = goal ? Math.min(100, Math.round(total.kcal / goal * 100)) : 0
-  return <div className="card">
-    <div className="row between" style={{ marginBottom: 6 }}>
-      <h2 style={{ margin: 0 }}>{t('Eaten today')}</h2>
-      <button className="iconbtn" onClick={() => nav('/nutrition')} aria-label={t('Nutrition')}><Icon name="chevronRight" /></button>
-    </div>
+  return <><h4 className="sec">{t('Eaten today')}</h4><div className="card tappable" {...tappable(() => nav('/nutrition'))}>
     <div className="big">{fmtNum(total.kcal)} <span className="muted" style={{ fontSize: '1rem' }}>{goal ? t('of {0} kcal', fmtNum(goal)) : 'kcal'}</span></div>
     {goal ? <div style={{ height: 8, borderRadius: 4, background: 'var(--fill-3, rgba(127,127,127,.2))', margin: '8px 0 4px' }}>
       <div style={{ width: pct + '%', height: '100%', borderRadius: 4, background: total.kcal > goal ? 'var(--red)' : 'var(--acc)' }} />
     </div> : null}
-    <div className="small dim" style={{ marginBottom: 12 }}>{t('P {0} · C {1} · F {2}', fmtNum(total.p), fmtNum(total.c), fmtNum(total.f))}</div>
-    <div className="row" style={{ gap: 8 }}>
-      <Button variant="primary" icon="camera" onClick={() => nutritionSheets().then(m => m.photoMealSheet())}>{t('Meal photo')}</Button>
-      <Button icon="plus" onClick={() => nutritionSheets().then(m => m.addFoodSheet())}>{t('Add food')}</Button>
+    <div className="row between">
+      <div className="small dim">{t('P {0} · C {1} · F {2}', fmtNum(total.p), fmtNum(total.c), fmtNum(total.f))}</div>
+      <div className="row" style={{ gap: 8 }}>
+        <button className="iconbtn" aria-label={t('Meal photo')} onClick={e => { e.stopPropagation(); nutritionSheets().then(m => m.photoMealSheet()) }}><Icon name="camera" /></button>
+        <button className="iconbtn" aria-label={t('Add food')} onClick={e => { e.stopPropagation(); nutritionSheets().then(m => m.addFoodSheet()) }}><Icon name="plus" /></button>
+      </div>
     </div>
-  </div>
+  </div></>
 }
 
 export default function Home() {
@@ -53,7 +49,6 @@ export default function Home() {
   const user = useStore(s => s.user)
   // The banner switched off and the sync stuck: a dot on the gear (Settings → Show connection status).
   const trouble = useConnectionTrouble()
-  const [weekOffset, setWeekOffset] = useState(0)
 
   const today = new Date()
   // A weekday can hold several routines. `todayRoutines` is the whole day; `routine` is the
@@ -70,12 +65,6 @@ export default function Home() {
   const prevBW = S.bodyweight.length > 1 ? S.bodyweight[S.bodyweight.length - 2] : null
   const delta = bw && prevBW ? bw.w - prevBW.w : null
 
-  const ws = weekStartOf(S)
-  // The first day of the shown week. Named for the role, not for Monday — which day that is
-  // is the setting.
-  const wkStart = new Date(today)
-  wkStart.setDate(today.getDate() - weekDayOffset(today.getDay(), ws) + weekOffset * 7)
-  const doneDays = new Set(S.workouts.map(w => w.d))
   // The last session logged for today, if any — what the row below reports instead of asking
   // you to start the one you already did. Last wins, so a second session names itself. Only once
   // today's plan is covered, though: a freestyle session on a planned day, or the rotation's
@@ -86,19 +75,6 @@ export default function Home() {
   const queueIds = queueOf(S)?.ids || []
   const coveredToday = id => !queueIds.includes(id) && loggedToday.some(w => (Array.isArray(w.routineIds) ? w.routineIds : [w.routineId]).includes(id))
   const doneToday = (todayRoutines.every(r => coveredToday(r.id)) && loggedToday.at(-1)) || null
-  const strip = []
-  for (let i = 0; i < 7; i++) {
-    const d = new Date(wkStart); d.setDate(wkStart.getDate() + i)
-    const iso = isoOf(d)
-    const eff = effectiveRoutineIds(S, iso).length > 0, ovr = S.dayPlan[iso] !== undefined, done = doneDays.has(iso)
-    // A day off with a note (#261) reads as excused, not as a plan that went by.
-    const dot = done ? ' done' : dayNoteOf(S, iso) ? ' noted' : ovr && eff ? ' ovr' : eff ? ' plan' : ''
-    strip.push(<div key={i} className={'wday' + (iso === todayISO() ? ' today' : '')} {...tappable(() => dayOverrideSheet(iso))}>
-      <div className="lbl">{t(DAYS[d.getDay()])}</div><div className="num">{d.getDate()}</div><div className={'dot' + dot} /></div>)
-  }
-  const wkEnd = new Date(wkStart); wkEnd.setDate(wkStart.getDate() + 6)
-  const wkLabel = weekOffset === 0 ? t('This week') : `${wkStart.getDate()} ${wkStart.toLocaleDateString(dateLocale(), { month: 'short' })} – ${wkEnd.getDate()} ${wkEnd.toLocaleDateString(dateLocale(), { month: 'short' })}`
-
   // A coach week (S.queue) read through the same tolerant reader QueueRow uses, so a malformed
   // queue from another client shows the weekday dots, never an empty card.
   const queue = queueView(S, todayISO())
@@ -147,10 +123,10 @@ export default function Home() {
 
     <FoodToday S={S} nav={nav} />
 
-    <div className="card row between" style={{ alignItems: 'center', gap: 12 }}>
-      <div style={{ minWidth: 0 }}><h2 style={{ margin: 0 }}>{t('Friends')}</h2>
-        <div className="muted small" style={{ marginTop: 4 }}>{t('Ranking, streaks and a nudge for whoever is skipping the gym.')}</div></div>
-      <Button size="sm" variant="tinted" trailingIcon="chevronRight" style={{ flexShrink: 0 }} onClick={() => nav('/friends')}>{t('Open')}</Button>
+    <h4 className="sec">{t('Friends')}</h4>
+    <div className="card row between tappable" style={{ alignItems: 'center', gap: 12 }} {...tappable(() => nav('/friends'))}>
+      <div className="muted" style={{ minWidth: 0 }}>{t('Ranking, streaks and a nudge for whoever is skipping the gym.')}</div>
+      <Icon name="chevronRight" className="chev" />
     </div>
 
     {!S.routines.length && !S.active && (
@@ -165,6 +141,7 @@ export default function Home() {
       </div>
     )}
 
+    <h4 className="sec">{t('This week')}</h4>
     <div className="card">
       {/* A coach week runs by order, not by weekday, so its progress row stands in for the
           seven dots (components/QueueRow.jsx). The today row below stays as it is: the queue's
@@ -172,14 +149,7 @@ export default function Home() {
       {rotating ? (queue ? <QueueRow S={S} today={todayISO()} onStart={onQueueStart} managed={managedQueue} /> : <div className="empty">
         {t('No rotation yet. Add routines to it in Plan.')}
         <div style={{ marginTop: 10 }}><Button size="sm" variant="tinted" onClick={() => nav('/plan')}>{t('Set up in Plan')}</Button></div>
-      </div>) : <>
-        <div className="row between" style={{ marginBottom: 8 }}>
-          <button className="iconbtn" style={{ width: 30, height: 30, fontSize: 15 }} onClick={() => setWeekOffset(w => w - 1)} aria-label={t('Previous week')}><Icon name="chevronLeft" /></button>
-          <div className="small muted" style={{ fontWeight: 500 }}>{wkLabel}</div>
-          <button className="iconbtn" style={{ width: 30, height: 30, fontSize: 15 }} onClick={() => setWeekOffset(w => w + 1)} aria-label={t('Next week')}><Icon name="chevronRight" /></button>
-        </div>
-        <div className="week">{strip}</div>
-      </>}
+      </div>) : null}
       {/* Once today's session is logged the row stops asking for it. The week strip already
           knew (its dot goes 'done'); this row did not, so a finished day kept showing the
           routine name behind a green Start tag and read as still outstanding (issue #4).

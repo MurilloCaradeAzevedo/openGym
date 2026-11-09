@@ -188,7 +188,7 @@ describe('Home — coach week progress row', () => {
     setS({ queue: { ids: 'd1' }, week: { [new Date().getDay()]: ['own'] } })
     mount()
     expect(host.querySelector('.queue')).toBeNull()
-    expect(host.querySelectorAll('.week .wday').length).toBe(7)
+    expect(host.querySelector('.today-row')).toBeTruthy()
     expect(todayTitle()).toBe('Core')
   })
 
@@ -227,7 +227,7 @@ describe('Home — coach week progress row', () => {
     setS({ queue: null })
     mount()
     expect(host.querySelector('.queue')).toBeNull()
-    expect(host.querySelectorAll('.wday').length).toBe(7)
+    expect(host.querySelector('.today-row')).toBeTruthy()
   })
 })
 

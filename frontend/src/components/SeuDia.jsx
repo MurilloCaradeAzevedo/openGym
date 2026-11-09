@@ -1,7 +1,9 @@
 // Leafy's "Seu Dia" at the top of Home: did you eat, did you train, and the week as a garden
 // (lib/day-garden.js). Calm on purpose: no score, a day grows for anything you did for yourself.
 import { t } from '../lib/i18n.js'
-import { fmtNum, todayISO } from '../lib/format.js'
+import { fmtNum, todayISO, DAYS } from '../lib/format.js'
+
+const DAYS_SHORT = DAYS
 import { dayTotals } from '../lib/nutrition.js'
 import { gardenWeek } from '../lib/day-garden.js'
 import Icon from './Icon.jsx'
@@ -38,14 +40,11 @@ export default function SeuDia({ S, name, trainedToday, onTrain, onEat }) {
       <DayCard icon="dumbbell" title={t('Worked out')} done={trainedToday} onClick={onTrain}
         sub={trainedToday ? t('Done') : t('Start')} />
     </div>
+    <h4 className="sec row between"><span>{t('Your garden this week')}</span><span>{t('{0} of 7 days', grown)}</span></h4>
     <div className="card garden">
-      <div className="row between" style={{ marginBottom: 12 }}>
-        <h2 style={{ margin: 0 }}>{t('Your garden this week')}</h2>
-        <span className="small muted">{t('{0} of 7 days', grown)}</span>
-      </div>
       <div className="garden-days" aria-hidden="true">
         {days.map(d => <span key={d.d} className={'garden-day' + (d.grew ? ' grew' : '') + (d.today ? ' today' : '') + (d.future ? ' future' : '')}>
-          <Icon name={d.grew ? 'leaf' : 'dot'} />
+          <Icon name="leaf" /><span className="garden-dn">{t(DAYS_SHORT[new Date(d.d + 'T12:00').getDay()])}</span>
         </span>)}
       </div>
       <div className="small muted" style={{ marginTop: 12 }}>{recognitionLine(S, name)}</div>

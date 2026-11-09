@@ -32,6 +32,9 @@ function render() {
   const root = createRoot(host)
   mounted.push(root)
   act(() => root.render(<Library />))
+  // The library opens on its shelves; these tests read the whole list.
+  const allShelf = host.querySelector('.shelf-all')
+  if (allShelf) act(() => allShelf.click())
   return host
 }
 const names = host => [...host.querySelectorAll('.item .tt')].map(el => el.textContent).slice(1)   // drop "Create your own"
@@ -78,7 +81,8 @@ describe('Library favourites', () => {
     const legs = EXDB.find(e => e.bp !== 'chest')
     mocks.S.favEx = [chest[4].id, legs.id]
     const host = render()
-    const chip = [...host.querySelectorAll('.chips .chip')].find(b => b.textContent === 'chest')
+    act(() => host.querySelector('.back-link').click())
+    const chip = [...host.querySelectorAll('.shelf')].find(b => b.querySelector('.shelf-t').textContent === 'chest')
     act(() => chip.click())
     const shown = names(host)
     expect(shown[0]).toBe(chest[4].n)

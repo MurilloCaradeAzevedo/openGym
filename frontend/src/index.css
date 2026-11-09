@@ -2050,6 +2050,8 @@ button.wl-summary{width:100%;padding:0 0 10px;text-align:start;border-radius:var
 }
 
 /* --- home: today's session row --- */
+/* Home's day row sits alone in its card now (no week strip above it). */
+.card > .today-row:first-child{margin-top:0}
 .today-row{
   display:flex;align-items:center;justify-content:space-between;gap:10px;
   margin-top:12px;padding:12px 14px;border-radius:var(--r);background:var(--surface-2);
@@ -2352,9 +2354,22 @@ button.wl-summary{width:100%;padding:0 0 10px;text-align:start;border-radius:var
 .dia-t{font-size:20px;font-weight:600;letter-spacing:-.017em}
 .dia-s{font-size:14px;color:var(--label-2)}
 .garden-days{display:grid;grid-template-columns:repeat(7,1fr);gap:6px}
-.garden-day{display:grid;place-items:center;aspect-ratio:1;border-radius:50%;background:var(--surface-2);color:var(--label-4);font-size:16px}
-.garden-day.grew{background:var(--acc-soft);color:var(--acc)}
-.garden-day.today{box-shadow:inset 0 0 0 1.5px var(--acc)}
+.garden-day{display:flex;flex-direction:column;align-items:center;gap:4px;color:var(--label-4);font-size:24px}
+.garden-day.grew{color:var(--acc)}
+.garden-dn{font-size:12px;color:var(--label-3)}
+.garden-day.today .garden-dn{color:var(--acc);font-weight:600}
+h4.sec.row{display:flex}
 .garden-day.future{opacity:.5}
 .leafyfig.turnable svg{touch-action:pan-y;cursor:grab}
 .leafyfig-cue{text-align:center;font-weight:600;font-size:17px;padding:4px 0 10px;min-height:24px}
+
+/* Exercise library shelves (views/Library.jsx): one tile per body part, then the list. */
+.shelves{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:4px}
+.shelf{display:flex;flex-direction:column;align-items:flex-start;justify-content:space-between;gap:10px;min-height:84px;
+  padding:14px;border-radius:var(--r-card);background:var(--surface);text-align:start;transition:transform var(--fast) var(--ease)}
+.shelf:active{transform:scale(.98)}
+.shelf-t{font-size:17px;font-weight:600;letter-spacing:-.01em;display:block}
+.shelf-n{font-size:13px;color:var(--label-2)}
+.shelf-head{margin:2px 0 10px}
+.shelf-head h2{font-size:28px;font-weight:700;letter-spacing:-.02em;margin:4px 0 0}
+.back-link{display:inline-flex;align-items:center;gap:2px;color:var(--acc);font-size:17px;min-height:44px;margin-inline-start:-6px}
