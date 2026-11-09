@@ -55,7 +55,7 @@ let host, root
 beforeEach(() => {
   mocks.S = {
     unit: 'kg', restSec: 90, restPauseSec: 15, sound: false, effort: 'none',
-    gifSize: 'full', workouts: [], routines: [], exWeights: {}, week: {}, dayPlan: {},
+    gifSize: 'full', workouts: [], routines: [{ id: 'r0', name: 'Legs', emoji: null, ex: [] }], exWeights: {}, week: {}, dayPlan: {},
   }
   host = document.createElement('div')
   document.body.appendChild(host)

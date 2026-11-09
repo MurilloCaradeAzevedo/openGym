@@ -54,7 +54,7 @@ let lastEnOnly = undefined
 
 export async function setLang(l, showEn, enOnly) {
   if (!LANGS[l]) l = 'en'
-  const show = showEn !== false
+  const show = showEn === true
   const only = enOnly === true
   // Both display switches participate in the early-exit, so toggling the parens or the
   // English-only switch re-applies state even when l did not change.

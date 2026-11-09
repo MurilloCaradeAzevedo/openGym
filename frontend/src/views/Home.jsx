@@ -119,7 +119,7 @@ export default function Home() {
       <button className="iconbtn" onClick={() => nav('/settings')} aria-label={trouble ? t('Settings') + ', ' + t('Connection problem') : t('Settings')}><Icon name="gear" />{trouble && <span className="tab-dot" aria-hidden="true" />}</button>
     </div>
 
-    <SeuDia S={S} name={user?.name} trainedToday={!!doneToday} onTrain={onToday} onEat={() => nav('/nutrition')} />
+    <SeuDia S={S} name={user?.name} />
 
     <FoodToday S={S} nav={nav} />
 

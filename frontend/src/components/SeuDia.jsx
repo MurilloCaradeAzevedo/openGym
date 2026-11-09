@@ -1,10 +1,7 @@
-// Leafy's "Seu Dia" at the top of Home: did you eat, did you train, and the week as a garden
+// Leafy's "Seu Dia" at the top of Home: the week as a garden
 // (lib/day-garden.js). Calm on purpose: no score, a day grows for anything you did for yourself.
 import { t } from '../lib/i18n.js'
-import { fmtNum, todayISO, DAYS } from '../lib/format.js'
-
-const DAYS_SHORT = DAYS
-import { dayTotals } from '../lib/nutrition.js'
+import { DAYS } from '../lib/format.js'
 import { gardenWeek } from '../lib/day-garden.js'
 import Icon from './Icon.jsx'
 import { recognitionFor } from '../lib/leafy/recognition.ts'
@@ -22,29 +19,15 @@ function recognitionLine(S, name) {
   return t(DAILY[r.n ?? 0])
 }
 
-function DayCard({ icon, title, sub, done, onClick }) {
-  return <button type="button" className={'dia-card' + (done ? ' is-done' : '')} onClick={onClick}>
-    <span className="dia-i"><Icon name={done ? 'check' : icon} /></span>
-    <span className="dia-t">{title}</span>
-    <span className="dia-s">{sub}</span>
-  </button>
-}
-
-export default function SeuDia({ S, name, trainedToday, onTrain, onEat }) {
-  const food = dayTotals(S.food, todayISO())
+// The day's own actions live in the cards below (Eaten today, This week); the garden is the summary.
+export default function SeuDia({ S, name }) {
   const { days, grown } = gardenWeek(S)
   return <>
-    <div className="dia-row">
-      <DayCard icon="fork" title={t('Ate')} done={food.items > 0} onClick={onEat}
-        sub={food.items > 0 ? fmtNum(food.kcal) + ' kcal' : t('Add food')} />
-      <DayCard icon="dumbbell" title={t('Worked out')} done={trainedToday} onClick={onTrain}
-        sub={trainedToday ? t('Done') : t('Start')} />
-    </div>
     <h4 className="sec row between"><span>{t('Your garden this week')}</span><span>{t('{0} of 7 days', grown)}</span></h4>
     <div className="card garden">
       <div className="garden-days" aria-hidden="true">
         {days.map(d => <span key={d.d} className={'garden-day' + (d.grew ? ' grew' : '') + (d.today ? ' today' : '') + (d.future ? ' future' : '')}>
-          <Icon name="leaf" /><span className="garden-dn">{t(DAYS_SHORT[new Date(d.d + 'T12:00').getDay()])}</span>
+          <Icon name="leaf" /><span className="garden-dn">{t(DAYS[new Date(d.d + 'T12:00').getDay()])}</span>
         </span>)}
       </div>
       <div className="small muted" style={{ marginTop: 12 }}>{recognitionLine(S, name)}</div>

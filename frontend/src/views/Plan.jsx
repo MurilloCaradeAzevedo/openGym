@@ -279,7 +279,7 @@ function Schedule({ S, update, nav, mode }) {
       <span className={'lrow-i' + (rs.length ? '' : ' rest')}><Icon name={rs.length ? glyphOf(rs[0].emoji) : 'moon'} /></span>
       <div className="grow">
         <div className="tt">{rs.length ? deriveSessionName(rs.map(r => r.name)) : t('Rest day')}</div>
-        <div className="ss">{rs.length === 1 ? exCount(rs[0].ex.length) : rs.length ? routineCount(rs.length) : t('Tap to plan something')}</div>
+        <div className="ss">{rs.length === 1 ? exCount(rs[0].ex.length) : rs.length ? routineCount(rs.length) : ''}</div>
       </div>
       {rs.length > 0 && <MiniBodyMap routines={rs} body={S.body} />}
       <Icon name="chevronRight" className="chev" />
@@ -323,7 +323,8 @@ function Schedule({ S, update, nav, mode }) {
       </div>
     </div>}
 
-    {mode === 'week' ? <>
+    {/* With no routine yet the seven rest days say nothing the empty state above does not. */}
+    {mode === 'week' ? S.routines.length > 0 && <>
       <h4 className="sec">{t('This week')}</h4>
       <div className="list plan-week">{weekOrder(ws).map(d => dayRow(d))}</div>
       <p className="sect-f">{t('Want two routines on one day? Tap the day and pick both.')}</p>
