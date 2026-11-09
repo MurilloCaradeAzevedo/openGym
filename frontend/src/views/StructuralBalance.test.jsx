@@ -104,7 +104,7 @@ describe('StructuralBalance view', () => {
     const host = render()
     for (const row of host.querySelectorAll('[data-role-id]')) {
       const name = row.querySelector('[data-exercise-name]')
-      expect(name.classList.contains('capitalize'), row.dataset.roleId).toBe(true)
+      expect(name.classList.contains('sentence'), row.dataset.roleId).toBe(true)
       expect(name.textContent.length).toBeGreaterThan(0)
     }
     expect(host.querySelector('[data-role-id="narrowBench"] [data-exercise-name]').textContent).toBe('barbell close-grip bench press')

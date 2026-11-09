@@ -172,8 +172,12 @@ export function autoplayClip(el) {
 // CDN hiccup) gets the same neutral tile as an exercise without media, instead of the browser's
 // broken-image glyph in a list of them (#281). The failure is remembered per image, so a list
 // that re-renders does not ask again; a new exercise in the same slot tries its own.
+// The list thumbnail follows the big picture: Leafy's drawing, still, unless exStyle is 'photo'.
 export function Thumb(p) {
-  return isCustomEx(p.ex) ? <CustomThumb {...p} /> : <BuiltinThumb {...p} />
+  const style = useStore(s => s.S.exStyle)
+  if (isCustomEx(p.ex)) return <CustomThumb {...p} />
+  if (style !== 'photo') return <div className="thumb thumb-fig" aria-hidden="true"><LeafyFigure ex={p.ex} compact paused /></div>
+  return <BuiltinThumb {...p} />
 }
 function BuiltinThumb({ ex }) {
   const body = useStore(s => figureOf(s.S))

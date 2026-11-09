@@ -214,7 +214,7 @@ const REPORT_CSS = `
   .hbar.top { background: #4d7c0f; }
 
   .ex-n { font-weight: 600; overflow-wrap: anywhere; }
-  .ex-n.capitalize { text-transform: capitalize; }
+  .ex-n.sentence::first-letter { text-transform: uppercase; }
   .ex-n .part { display: inline-block; text-transform: none; color: var(--faint); font-weight: 400; font-size: 8pt; margin-inline-start: 2pt; }
   .ex-n .part::first-letter { text-transform: uppercase; }
   td.num + td.num, th.num + th.num { padding-inline-start: 12pt; }

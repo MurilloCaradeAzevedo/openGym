@@ -111,13 +111,13 @@ describe('exerciseNameClass', () => {
 
   it('title-cases only while the English fallback is showing', () => {
     _setLangState('en', {}, null, null)
-    expect(exerciseNameClass(bench)).toBe('capitalize')
+    expect(exerciseNameClass(bench)).toBe('sentence')
     _setLangState('de', {}, null, null)
-    expect(exerciseNameClass(bench)).toBe('capitalize')
+    expect(exerciseNameClass(bench)).toBe('sentence')
     _setLangState('de', {}, null, { '0025': 'Bankdrücken mit Langhantel' })
     expect(exerciseNameClass(bench)).toBe('')
     _setLangState('en', {}, null, null)
-    expect(exerciseNameClass(bench)).toBe('capitalize')
+    expect(exerciseNameClass(bench)).toBe('sentence')
   })
 
   // German covers the equipment exercises and not the body-weight ones: an exercise the pack
@@ -125,9 +125,9 @@ describe('exerciseNameClass', () => {
   it('decides per exercise, so an untranslated one in a partial pack keeps its casing', () => {
     _setLangState('de', {}, null, { '0025': 'Bankdrücken mit Langhantel' })
     expect(exerciseNameClass(bench)).toBe('')
-    expect(exerciseNameClass(pushUp)).toBe('capitalize')
-    expect(exerciseNameClass(custom)).toBe('capitalize')
-    expect(exerciseNameClass(undefined)).toBe('capitalize')
+    expect(exerciseNameClass(pushUp)).toBe('sentence')
+    expect(exerciseNameClass(custom)).toBe('sentence')
+    expect(exerciseNameClass(undefined)).toBe('sentence')
     _setLangState('en', {}, null, null)
   })
 })
@@ -164,10 +164,10 @@ describe('title-casing per exercise-name pack', () => {
       const names = packFor(baseLang(lang))
       const translated = EXDB.filter(e => names[e.id])
       _setLangState(lang, {}, null, names)
-      for (const ex of translated) expect(exerciseNameClass(ex), `${lang} ${ex.id}`).toBe(cased ? '' : 'capitalize')
+      for (const ex of translated) expect(exerciseNameClass(ex), `${lang} ${ex.id}`).toBe(cased ? '' : 'sentence')
       // An exercise the pack does not cover shows the lower-case English title either way.
       const untranslated = EXDB.find(e => !names[e.id])
-      if (untranslated) expect(exerciseNameClass(untranslated)).toBe('capitalize')
+      if (untranslated) expect(exerciseNameClass(untranslated)).toBe('sentence')
       _setLangState('en', {}, null, null)
     })
   }
@@ -191,7 +191,7 @@ describe('English-name switches with every exercise-name pack', () => {
       expect(ex, lang).toBeTruthy()
       _setLangState(lang, {}, null, names)
       // German keeps its own casing; a lower-case pack is title-cased like English.
-      const translatedClass = CASED_NAME_LANGS.includes(lang) ? '' : 'capitalize'
+      const translatedClass = CASED_NAME_LANGS.includes(lang) ? '' : 'sentence'
       // A right-to-left language isolates the English part, brackets included (exerciseNameFor).
       const english = RTL_LANGS.has(lang) ? `\u2068(${ex.n})\u2069` : `(${ex.n})`
       expect(exerciseNameFor(ex)).toBe(`${names[ex.id]} ${english}`)
@@ -202,7 +202,7 @@ describe('English-name switches with every exercise-name pack', () => {
       _setLangState(lang, {}, null, names, true, true)
       expect(exerciseNameFor(ex)).toBe(ex.n)
       // The English title is stored lower-case, so it gets the title-casing back with it.
-      expect(exerciseNameClass(ex)).toBe('capitalize')
+      expect(exerciseNameClass(ex)).toBe('sentence')
       _setLangState('en', {}, null, null)
     })
   }
@@ -213,7 +213,7 @@ describe('English-name switches with every exercise-name pack', () => {
     for (const [showEn, enOnly] of [[true, false], [false, false], [true, true]]) {
       _setLangState('de', {}, null, names, showEn, enOnly)
       expect(exerciseNameFor(ex)).toBe(ex.n)
-      expect(exerciseNameClass(ex)).toBe('capitalize')
+      expect(exerciseNameClass(ex)).toBe('sentence')
     }
     _setLangState('en', {}, null, null)
   })

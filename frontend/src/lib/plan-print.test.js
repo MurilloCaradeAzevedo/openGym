@@ -67,8 +67,8 @@ describe('planPrintHTML exercise-name casing per language', () => {
     it(`${lang}: ${CASED_NAME_LANGS.includes(lang) ? 'no title-casing on the translated name' : 'the translated name is title-cased'}`, () => {
       _setLangState(lang, {}, null, packs[`../exercise-names/${lang}.js`])
       const html = planPrintHTML(S, 'Ana', { routineId: 'pull' })
-      expect(nameClass(html)).toBe(CASED_NAME_LANGS.includes(lang) ? '' : 'capitalize')
-      expect(html).toContain('.ex-n.capitalize { text-transform: capitalize; }')
+      expect(nameClass(html)).toBe(CASED_NAME_LANGS.includes(lang) ? '' : 'sentence')
+      expect(html).toContain('.ex-n.sentence::first-letter { text-transform: uppercase; }')
     })
   }
 })

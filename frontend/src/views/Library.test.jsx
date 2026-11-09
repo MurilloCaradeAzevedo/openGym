@@ -102,7 +102,7 @@ describe('Library exercise-name casing per language', () => {
       expect(rows.length).toBeGreaterThan(0)
       const translated = rows.filter(el => Object.values(pack).some(n => el.textContent.startsWith(n)))
       expect(translated.length, lang).toBeGreaterThan(0)
-      for (const el of translated) expect(el.classList.contains('capitalize'), `${lang}: ${el.textContent}`).toBe(!CASED_NAME_LANGS.includes(lang))
+      for (const el of translated) expect(el.classList.contains('sentence'), `${lang}: ${el.textContent}`).toBe(!CASED_NAME_LANGS.includes(lang))
     })
   }
 })

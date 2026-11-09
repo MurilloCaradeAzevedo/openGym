@@ -71,8 +71,8 @@
 }
 
 :root[data-theme="light"] {
-  --bg:        #faf9f6;   /* warm paper */
-  --bg-el:     #f5f3ee;
+  --bg:        #f3f1ec;   /* warm paper, a step under the white cards like iOS grouped lists */
+  --bg-el:     #efece6;
   --surface:   #ffffff;
   --surface-2: #f1eee8;
   --surface-3: #e8e4dd;
@@ -187,6 +187,10 @@ button,.chip,.tile,.item,.wday,.cal-d,.swatch,.hm-c,.lrow,.seg button,.stp butto
 .small{font-size:13px;line-height:1.38}
 .accent{color:var(--acc)}
 .capitalize{text-transform:capitalize}
+/* Exercise names (exerciseNameClass): sentence case, the way Portuguese and Apple write labels,
+   not Every Word Capitalised. ::first-letter needs a block, so a name in a span becomes one. */
+.sentence::first-letter{text-transform:uppercase}
+span.sentence{display:inline-block}
 /* exercise names and body-part/equipment terms arrive lowercase from the dataset,
    so tags and chips capitalise by default. Anything that is a unit or a sentence opts
    back out — blanket-capitalising turned "60 kg" into "60 Kg" and a whole hint into
@@ -587,6 +591,9 @@ h4.sec{
 }
 .routine-list.is-reordering,.routine-list.is-reordering *{cursor:grabbing}
 .thumb{width:50px;height:50px;border-radius:9px;object-fit:cover;background:#fff;flex:none}
+.thumb-fig{overflow:hidden;background:var(--surface-2)}
+.thumb-fig .exmedia{margin:0;background:none;border-radius:0;height:100%}
+.thumb-fig .leafyfig svg,.thumb-fig .leafyfig.compact svg{width:100%;height:100%;max-height:none}
 /* exercise pictures are decoration inside tappable rows/cards: no save-image callout on
    a long press and no drag ghost when a scroll starts on the picture */
 .thumb,.exmedia img,.exmedia video{-webkit-touch-callout:none;-webkit-user-drag:none;user-select:none;-webkit-user-select:none}

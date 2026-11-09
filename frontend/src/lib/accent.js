@@ -99,7 +99,7 @@ export function inkOn(hex) {
 // on the theme, and at least 2:1 away from --label-2.
 export const THEMES = {
   dark: { bgs: ['#1a1a1a', '#242424'], min: 3, toward: '#ffffff', label2: ['#8d8d93', '#98989f'] },
-  light: { bgs: ['#faf9f6', '#ffffff'], min: 3, toward: '#000000', label2: ['#85858b', '#8a8a8e'] },
+  light: { bgs: ['#f3f1ec', '#ffffff'], min: 3, toward: '#000000', label2: ['#85858b', '#8a8a8e'] },
 }
 // Below this HSL saturation a colour counts as a grey (white, black, #808080, near-whites).
 export const GREY_SAT = 0.25

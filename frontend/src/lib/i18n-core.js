@@ -243,7 +243,7 @@ export const CASED_NAME_LANGS = ['de']
 // Callers spread this onto the element that holds exerciseNameFor(ex)'s output, nothing else —
 // muscle and equipment labels next to it are t() strings and keep their own capitalize.
 export const exerciseNameClass = ex => (!enOnly && exerciseNames && ex && exerciseNames[ex.id]
-  && CASED_NAME_LANGS.includes(baseLang(lang)) ? '' : 'capitalize')
+  && CASED_NAME_LANGS.includes(baseLang(lang)) ? '' : 'sentence')
 
 // Search both the localized and canonical English title without changing persisted data.
 export const exerciseNameSearchText = ex => {

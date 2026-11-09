@@ -482,7 +482,7 @@ const PLAN_CSS = `
     font-size: 7pt; font-weight: 700; line-height: 14pt; text-align: center; }
   .ex-main { flex: 1 1 auto; min-width: 0; }
   .ex-n { font-weight: 600; overflow-wrap: anywhere; }
-  .ex-n.capitalize { text-transform: capitalize; }
+  .ex-n.sentence::first-letter { text-transform: uppercase; }
   .ex-n .part { display: inline-block; text-transform: none; color: var(--faint); font-weight: 400; font-size: 8pt; margin-inline-start: 3pt; }
   .ex-n .part::first-letter { text-transform: uppercase; }
   .ex-en { color: var(--faint); font-size: 8pt; text-transform: capitalize; overflow-wrap: anywhere; }
