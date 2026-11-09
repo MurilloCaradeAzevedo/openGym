@@ -6,7 +6,8 @@ name: Publish Docker images
 # bots read those as a newer version. See issue #87.
 #
 # Tags follow the GitLab registry so both say the same thing: a release publishes
-# `X.Y.Z`, `X.Y` and `latest`; a push to main publishes only `edge`. (`latest` used
+# `X.Y.Z`, `X.Y` and `latest`; a push to main publishes `edge`. Every build also gets
+# `sha-<full commit>`, the tag the deploy pins. (`latest` used
 # to follow main here, and a release run overwrote it as well, so thirteen releases
 # published at once left it pointing at whichever finished last.) Re-running the
 # workflow by hand on a `vX.Y.Z` ref republishes exactly that version's tags.
@@ -96,6 +97,8 @@ jobs:
             type=raw,value=latest,enable=${{ startsWith(github.ref, 'refs/tags/') }}
             type=semver,pattern={{version}}
             type=semver,pattern={{major}}.{{minor}}
+            # sha-<full commit>: what deploy.yml runs, so production is exactly the tested commit.
+            type=sha,format=long
 
       - uses: docker/build-push-action@c3c9e263c25d99ce0380d002d59b67737d91b0dc # v7.4.0
         with:

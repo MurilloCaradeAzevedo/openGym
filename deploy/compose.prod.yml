@@ -1,7 +1,8 @@
 # Production on one server: the images CI publishes for this fork, Caddy for HTTPS, bounded logs.
 #   docker compose -f docker-compose.yml -f deploy/compose.prod.yml pull
 #   docker compose -f docker-compose.yml -f deploy/compose.prod.yml up -d
-# IMAGE_OWNER and IMAGE_TAG come from .env (setup-server.sh writes them).
+# IMAGE_OWNER and IMAGE_TAG come from .env (setup-server.sh writes them; each deploy pins
+# IMAGE_TAG=sha-<commit>).
 x-logging: &logging
   driver: json-file
   options: { max-size: "10m", max-file: "5" }
@@ -10,6 +11,11 @@ services:
   api:
     image: ghcr.io/${IMAGE_OWNER}/opengym-api:${IMAGE_TAG:-edge}
     pull_policy: always
+    # A public server is closed by default, even with an older .env that never set these.
+    # setup-server.sh opens sign-up once (INVITE_ONLY=0 for that run only) so the owner can join.
+    environment:
+      - INVITE_ONLY=${INVITE_ONLY:-1}
+      - ALLOW_GUEST=${ALLOW_GUEST:-0}
     logging: *logging
   web:
     image: ghcr.io/${IMAGE_OWNER}/opengym-web:${IMAGE_TAG:-edge}

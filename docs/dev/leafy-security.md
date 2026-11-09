@@ -38,18 +38,36 @@ Added for Leafy:
 - `deploy/Caddyfile`: HSTS for a year and a Permissions-Policy that turns off camera, microphone,
   location, payment and USB; the `Server` header is dropped.
 
-On the VM (`~/opengym/.env`), the public instance should run with:
+Safe by default on a fresh install (`deploy/setup-server.sh`, details in `deploy/README.md`):
 
 ```
 INVITE_ONLY=1      # new profiles need a code the admin generates
 ALLOW_GUEST=0      # no anonymous guest profiles on a server
+FIRST_USER_ADMIN=1 # only acts while there are no profiles at all
+PASSWORD_LOGIN=1   # set it to 0 once the owner has a passkey
 ```
 
-`FIRST_USER_ADMIN` only acts while there are no users, so leaving it is harmless. Keep
-`PASSWORD_LOGIN` off once the owner has a passkey. `chmod 600 .env`.
+- The generated `.env` is written with mode 600 and always carries `INVITE_ONLY=1` and
+  `ALLOW_GUEST=0`; `deploy/compose.prod.yml` uses the same values when an older `.env` lacks them.
+  Invite-only also blocks the very first sign-up, so the script opens sign-up once, for 15 minutes,
+  only while the server has no profile: the owner signs up then and becomes the admin.
+- The script is fetched from a pinned commit and checked with `sha256sum -c`, not piped from a
+  branch. Docker comes from Docker's apt repository with a `signed-by` keyring whose fingerprint
+  is checked.
+- Root never runs a file the login user can edit: cron runs `/usr/local/sbin/opengym-backup` and
+  CI calls `/usr/local/sbin/opengym-deploy`, both root-owned copies, re-installed on each deploy
+  (the backup) or each run of the setup script (both).
+- Deploys are pinned: images get a `sha-<commit>` tag, and the deploy checks out the commit whose
+  tests passed and runs exactly that tag, never `:edge`.
+- CI reaches the server only with a known host key (`DEPLOY_KNOWN_HOSTS`,
+  `StrictHostKeyChecking=yes`). The deploy key should be limited to the deploy script with a forced
+  `command=` and `no-pty,no-port-forwarding,no-agent-forwarding`, the deploy account's sudo limited
+  to that one script, and the `production` environment should require the owner's approval.
+- `node scripts/check-secrets.mjs --all` runs in CI on every change (`test.yml`). It also refuses
+  `*.env` files with any prefix and JSON values under `token`, `secret`, `password` or `api_key`.
 
 Host hygiene: `unattended-upgrades` for security patches, `fail2ban` for SSH, SSH reachable only
-through Google's IAP range, ports 80 and 443 only for the web, and the nightly `deploy/backup.sh`.
+through Google's IAP range, ports 80 and 443 only for the web, and the nightly backup.
 
 ## 4. What the exercise media licence still forbids
 

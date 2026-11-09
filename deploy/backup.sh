@@ -1,6 +1,7 @@
 #!/usr/bin/env bash
 # Nightly copy of ./data (users, passkeys, every profile, the session secret), kept 14 days.
-# Installed as a cron job by setup-server.sh. Copy ~/opengym-backups off the server too:
+# setup-server.sh and every deploy install a root-owned copy as /usr/local/sbin/opengym-backup,
+# and root's cron runs that copy, never this file. Copy ~/opengym-backups off the server too:
 # a backup on the same disk does not survive the disk.
 set -euo pipefail
 # Nothing this script writes is readable by other users, not even for a moment.

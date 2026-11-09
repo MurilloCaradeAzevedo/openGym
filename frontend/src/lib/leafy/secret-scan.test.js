@@ -18,15 +18,29 @@ describe('check-secrets', () => {
     expect(scanText('x.md', 'PASSWORD=changeme-please-edit')).toHaveLength(0)
   })
 
+  it('flags a secret in a JSON value, but not placeholders', () => {
+    const value = fake('Zk3p9Xw27Q', 'mN41vLbT8yRe5H')
+    for (const key of ['token', 'secret', 'password', 'api_key', 'apiKey', 'TOKEN']) {
+      expect(scanText('a.json', fake('{ "', key, '": "', value, '" }'))).toHaveLength(1)
+    }
+    expect(scanText('a.json', fake('{"token":"', value, '"}'))).toHaveLength(1)
+    expect(scanText('a.json', '{ "token": "<your token>" }')).toHaveLength(0)
+    expect(scanText('a.json', '{ "token": "short" }')).toHaveLength(0)
+    expect(scanText('a.json', fake('{ "name": "', value, '" }'))).toHaveLength(0)
+  })
+
   it('flags files that must never be committed', () => {
     for (const f of ['.env', 'a/.env.local', 'release/opengym.keystore', 'android/app/google-services.json',
-      '.claude/dev-test-accounts.json', 'data/vapid.json', 'data/state-abc.json']) {
+      '.claude/dev-test-accounts.json', 'data/vapid.json', 'data/state-abc.json',
+      'prod.env', 'deploy/server.env', 'a/staging.prod.env']) {
       expect(scanText(f, '').length).toBeGreaterThan(0)
     }
   })
 
   it('lets examples through', () => {
     expect(scanText('.env.example', 'ADMIN_UIDS=')).toHaveLength(0)
+    expect(scanText('deploy/example.env', '')).toHaveLength(0)
+    expect(scanText('src/environment.js', '')).toHaveLength(0)
     expect(scanText('docs/a.md', 'Set it with `FIRST_USER_ADMIN=1`')).toHaveLength(0)
     expect(scanText('a.js', fake('const k = "AIza', 'SyA1234567890abcdefghijklmnopqrstuv" // secret-scan: allow'))).toHaveLength(0)
   })
