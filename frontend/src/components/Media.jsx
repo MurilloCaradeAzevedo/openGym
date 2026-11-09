@@ -6,7 +6,7 @@ import { t, exerciseNameFor } from '../lib/i18n.js'
 import Icon from './Icon.jsx'
 import CustomMedia, { CustomThumb } from './CustomMedia.jsx'
 import { useAnimSources } from './Animations.jsx'
-import LeafyFigure from './LeafyFigure.jsx'
+import LeafyFigure, { leafyFigureFor } from './LeafyFigure.jsx'
 
 // An exercise's picture, wherever one shows. A custom exercise goes to CustomMedia.jsx — its own
 // photo, GIF, video or link, from the local media store — and never through imgSrc/gifSrc, which
@@ -176,7 +176,9 @@ export function autoplayClip(el) {
 export function Thumb(p) {
   const style = useStore(s => s.S.exStyle)
   if (isCustomEx(p.ex)) return <CustomThumb {...p} />
-  if (style !== 'photo') return <div className="thumb thumb-fig" aria-hidden="true"><LeafyFigure ex={p.ex} compact paused /></div>
+  if (style !== 'photo') return leafyFigureFor(p.ex)
+    ? <div className="thumb thumb-fig" aria-hidden="true"><LeafyFigure ex={p.ex} compact paused /></div>
+    : <div className="thumb thumb-x"><Icon name="dumbbell" /></div>
   return <BuiltinThumb {...p} />
 }
 function BuiltinThumb({ ex }) {

@@ -52,8 +52,16 @@ function Shape({ s, dark }) {
   return <polygon points={s.pts.map(q => q.join(',')).join(' ')} fill={color} stroke={color} strokeWidth="5" strokeLinejoin="round" opacity={op} />
 }
 
+/** The drawing for an exercise, or null when its movement was only guessed (from the muscle or
+ *  the category, not the name): a wrong animation teaches the wrong thing, so none is shown. */
+export function leafyFigureFor(ex) {
+  const d = fromExdb(ex)
+  const fig = d && classify(d)
+  return fig && fig.reason === 'name' ? fig : null
+}
+
 export default function LeafyFigure({ ex, id, compact, paused }) {
-  const figure = useMemo(() => { const d = fromExdb(ex); return d ? classify(d) : null }, [ex])
+  const figure = useMemo(() => leafyFigureFor(ex), [ex])
   const [yaw, setYaw] = useState(null)
   const drag = useRef(null)
   const cycle = useCycle(!!paused || reducedMotion())
