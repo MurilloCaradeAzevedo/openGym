@@ -37,7 +37,7 @@ const canNudge = f => f.daysAway == null || f.daysAway >= NUDGE_AFTER_DAYS
 function AddFriend({ code: mine, close, onDone }) {
   const [code, setCode] = useState('')
   const share = async () => {
-    const text = t('Add me on openGym with my friend code: {0}', mine)
+    const text = t('Add me on Leafy with my friend code: {0}', mine)
     try {
       if (navigator.share) await navigator.share({ text })
       else { await navigator.clipboard.writeText(mine); toast(t('Code copied')) }
@@ -126,7 +126,7 @@ export default function Friends() {
   </div>
 
   if (!user) return <div className="narrow">{header}
-    <p className="fr-empty">{t('Friends need an account on an openGym server. Sign in or connect this phone to your server first.')}</p>
+    <p className="fr-empty">{t('Friends need an account on a Leafy server. Sign in or connect this phone to your server first.')}</p>
     <Button variant="primary" onClick={() => nav('/settings')}>{t('Open settings')}</Button>
   </div>
 

@@ -152,7 +152,7 @@ ${css}</style></head>
     ${factLine ? `<div class="facts">${factLine}</div>` : ''}
   </header>
   ${body}
-  <div class="end keep">${esc(t('Made with openGym'))} · opengym.ch</div>
+  <div class="end keep">${esc(t('Made with Leafy'))} · opengym.ch</div>
 </div></body></html>`
 }
 
