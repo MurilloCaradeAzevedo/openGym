@@ -2,7 +2,7 @@
    database. The routes get their helpers handed in, so they are driven here without a server. */
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { socialRoutes, workoutSummary, MAX_FRIENDS, MAX_PENDING_OUT, ASK_PER_HOUR } from '../social.js';
+import { socialRoutes, workoutSummary, MAX_FRIENDS, MAX_PENDING_OUT, MAX_PENDING_IN, ASK_PER_HOUR } from '../social.js';
 
 const HOUR = 3600000;
 const DAY = 24 * HOUR;
@@ -73,6 +73,22 @@ test('a person can have only so many requests waiting', async () => {
   const over = await call('POST /api/social/request', { code: codes[`u${MAX_PENDING_OUT + 1}`] }, 'u0');
   assert.equal(over.status, 400);
   assert.equal(over.body.code, 'limit');
+});
+
+test('a person can have only so many requests waiting for them; asking back still works', async () => {
+  const { db, call, codes, pushes } = setup(3);
+  const fill = to => Array.from({ length: MAX_PENDING_IN }, (_, i) => ({ from: `${to}x${i}`, to, at: 1 }));
+  db.social.requests = [...fill('u1'), { from: 'u1', to: 'u0', at: 1 }, ...fill('u2')];
+  db.users.push(...db.social.requests.filter(r => r.from.includes('x')).map(r => ({ id: r.from, name: r.from })));
+  const before = db.social.requests.length;
+  const over = await call('POST /api/social/request', { code: codes.u2 }, 'u0');
+  assert.equal(over.status, 400);
+  assert.equal(over.body.code, 'limit');
+  assert.equal(db.social.requests.length, before);
+  assert.equal(pushes.length, 0);
+  const back = await call('POST /api/social/request', { code: codes.u1 }, 'u0');
+  assert.equal(back.status, 200);
+  assert.equal(back.body.status, 'friends');
 });
 
 test('accepting also stops at the friend limit, for either side', async () => {

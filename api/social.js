@@ -21,6 +21,7 @@ export const NUDGE_AFTER_DAYS = 3;
 // the same person is pushed about the same person at most once a day, however often they ask.
 export const ASK_PER_HOUR = 60;
 export const MAX_PENDING_OUT = 50;
+export const MAX_PENDING_IN = 200;
 const DAY = 86400000;
 // No 0/O, 1/I/L: read aloud or typed from a screenshot.
 const ALPHABET = 'ABCDEFGHJKMNPQRSTUVWXYZ23456789';
@@ -190,6 +191,7 @@ export function socialRoutes({ db, saveDb, json, readBody, readSession, readStat
       }
       if (!s.requests.some(r => r.from === user.id && r.to === to)) {
         if (s.requests.filter(r => r.from === user.id).length >= MAX_PENDING_OUT) return json(res, 400, { error: 'too many requests waiting', code: 'limit' });
+        if (s.requests.filter(r => r.to === to).length >= MAX_PENDING_IN) return json(res, 400, { error: 'too many requests waiting', code: 'limit' });
         s.requests.push({ from: user.id, to, at: now() });
         // One push per pair per day, even if the request is withdrawn and made again.
         const key = `${user.id}>${to}`;
