@@ -12,6 +12,9 @@ import Modals from '../components/Modals.jsx'
 import { bindUI } from '../components/ui.jsx'
 import { useUI } from '../store/useUI.js'
 
+// The deeper cards sit under Stats' Details toggle; these tests read them, so open it.
+const openDetails = () => { const b = document.querySelector('.stats-details[aria-expanded="false"]'); if (b) act(() => b.click()) }
+
 const DAY = 86400000
 const HOUR = 3600000
 const BASE_NOW = Date.UTC(2026, 0, 22, 12)
@@ -177,6 +180,7 @@ function installDom() {
 async function mountStats() {
   installDom()
   await act(async () => { root.render(React.createElement(React.Fragment, null, React.createElement(Stats), React.createElement(Modals))) })
+  openDetails()
 }
 
 async function unmountStats() {

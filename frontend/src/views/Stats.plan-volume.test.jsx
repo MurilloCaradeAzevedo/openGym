@@ -19,6 +19,9 @@ vi.mock('../components/BodyMap.jsx', () => ({ default: () => React.createElement
 
 import Stats, { WeeklyPlanVolume } from './Stats.jsx'
 
+// The deeper cards sit under Stats' Details toggle; these tests read them, so open it.
+const openDetails = () => { const b = document.querySelector('.stats-details[aria-expanded="false"]'); if (b) act(() => b.click()) }
+
 const press = { id: 'press', n: 'Press', primaries: ['chest'], secondaries: ['triceps'], custom: true }
 const state = over => ({
   unit: 'kg', body: 'male', effort: null, targetW: null, bodyweight: [], exWeights: {}, workouts: [], dayPlan: {},
@@ -81,13 +84,13 @@ describe('Stats — weekly muscle volume from the plan', () => {
 
   it('sits on Stats right after Muscle balance, and only once there are routines', () => {
     mocks.S = state()
-    act(() => root.render(<Stats />))
+    act(() => root.render(<Stats />)); openDetails()
     const balance = [...host.querySelectorAll('.card h2')].find(h => h.textContent.startsWith('Muscle balance'))?.closest('.card')
     expect(balance).toBeTruthy()
     expect(balance.nextElementSibling).toBe(card())
     expect(card().id).toBe('weekly-volume')
     mocks.S = state({ routines: [], week: {} })
-    act(() => root.render(<Stats />))
+    act(() => root.render(<Stats />)); openDetails()
     expect(card()).toBeNull()
   })
 
@@ -99,7 +102,7 @@ describe('Stats — weekly muscle volume from the plan', () => {
       const scroll = vi.fn()
       const orig = Element.prototype.scrollIntoView
       Element.prototype.scrollIntoView = scroll
-      act(() => root.render(<Stats />))
+      act(() => root.render(<Stats />)); openDetails()
       act(() => { vi.advanceTimersByTime(50) })
       Element.prototype.scrollIntoView = orig
       expect(scroll).toHaveBeenCalledTimes(1)

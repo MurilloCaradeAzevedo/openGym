@@ -472,6 +472,8 @@ export function WeeklyPlanVolume({ S }) {
 }
 
 export default function Stats() {
+  // Plan's weekly-volume link (below) lands inside the folded details, so it opens them.
+  const [details, setDetails] = useState(() => /[?&]focus=weekly-volume/.test(window.location.hash || ''))
   const nav = useNavigate()
   const S = useStore(s => s.S)
   const [range, setRange] = useState(90)
@@ -737,44 +739,6 @@ export default function Stats() {
       {lifetime > 0 && <div className="tile" style={{ gridColumn: '1 / -1' }} data-lifetime-volume><SeasonDeco spot="stats-tile" /><div className="l"><Icon name="plate" />{t('Lifted in total')}</div><div className="v">{fmtVol(Math.round(lifetime), S.unit)}</div></div>}
     </div>
 
-    <div className="card">
-      <SeasonDeco spot="stats-heatmap" />
-      <h2>{t('Activity (last 12 months)')}</h2>
-      <Heatmap
-        S={S}
-        metric={S.heatmapMetric === 'vol' ? 'vol' : 'time'}
-        onMetricChange={metric => useStore.getState().update(s => { s.heatmapMetric = metric })}
-        onDay={iso => { const ws = workouts.filter(w => workoutDay(w) === iso); if (ws.length === 1) workoutDetailSheet(ws[0]); else if (ws.length) calendarSheet(iso); else dayOverrideSheet(iso) }}
-      />
-    </div>
-
-    {(workouts.length > 0 || Object.keys(loadOfWeeklyPlan(S)).length > 0) && <MuscleBalance S={S} />}
-    {S.routines.length > 0 && <WeeklyPlanVolume S={S} />}
-    {workouts.length > 0 && <div className="card row between" style={{ alignItems: 'center', gap: 12 }}>
-      <div style={{ minWidth: 0 }}><h2 style={{ margin: 0 }}>{t('Structural balance')}</h2>
-        <div className="muted small" style={{ marginTop: 4 }}>{t('See which lift is holding back the rest.')}</div></div>
-      <Button size="sm" variant="tinted" trailingIcon="chevronRight" style={{ flexShrink: 0 }} onClick={() => nav('/structural-balance')}>{t('Open')}</Button>
-    </div>}
-    {(workouts.length > 0 || dayPhotosOf(S).length > 0) && <div className="card row between" style={{ alignItems: 'center', gap: 12 }}>
-      <div style={{ minWidth: 0 }}><h2 style={{ margin: 0 }}>{t('Progress photos')}</h2>
-        <div className="muted small" style={{ marginTop: 4 }}>{t('Every progress photo, lined up by date, for any day. Plus a before/after slider.')}</div></div>
-      <Button size="sm" variant="tinted" trailingIcon="chevronRight" style={{ flexShrink: 0 }} onClick={() => nav('/progress-photos')}>{t('Open')}</Button>
-    </div>}
-    <div className="card row between" style={{ alignItems: 'center', gap: 12 }}>
-      <SeasonDeco spot="stats-peek" />
-      <div style={{ minWidth: 0 }}><h2 style={{ margin: 0 }}>{t('Body measurements')}</h2>
-        <div className="muted small" style={{ marginTop: 4 }}>{(S.measurements || []).length
-          ? t('Last check-in {0}', fmtDate(S.measurements[S.measurements.length - 1].d, true))
-          : t('Waist, arms, body fat and anything else you measure, each with its own curve.')}</div></div>
-      <Button size="sm" variant="tinted" trailingIcon="chevronRight" style={{ flexShrink: 0 }} onClick={() => nav('/measurements')}>{t('Open')}</Button>
-    </div>
-    <div className="card row between" style={{ alignItems: 'center', gap: 12 }}>
-      <div style={{ minWidth: 0 }}><h2 style={{ margin: 0 }}>{t('Nutrition')}</h2>
-        <div className="muted small" style={{ marginTop: 4 }}>{t('Log meals from the TACO table and set calorie and macro targets.')}</div></div>
-      <Button size="sm" variant="tinted" trailingIcon="chevronRight" style={{ flexShrink: 0 }} onClick={() => nav('/nutrition')}>{t('Open')}</Button>
-    </div>
-    {(hasEffort(S) || hasEstimableEffort(S)) && <EffortCard S={S} />}
-
     <div className="cols">
       <div className="card">
         <div className="row between bw-head" style={{ marginBottom: 8 }}>
@@ -867,5 +831,33 @@ export default function Stats() {
       </div>
       <div className="list">{[...workouts].reverse().slice(0, 6).map(w => <WorkoutRow key={w.id} w={w} onClick={() => workoutDetailSheet(w)} />)}</div>
     </>}
+    {/* The deeper reads of your training, folded until asked for. */}
+    <div className="row" style={{ justifyContent: 'center', margin: '14px 0 4px' }}>
+      <Button className="stats-details" size="sm" variant="ghost" trailingIcon={details ? 'chevronUp' : 'chevronDown'} aria-expanded={details} onClick={() => setDetails(d => !d)}>{details ? t('Show less') : t('Details')}</Button>
+    </div>
+    {details && <>
+    {(workouts.length > 0 || Object.keys(loadOfWeeklyPlan(S)).length > 0) && <MuscleBalance S={S} />}
+    {S.routines.length > 0 && <WeeklyPlanVolume S={S} />}
+    {(hasEffort(S) || hasEstimableEffort(S)) && <EffortCard S={S} />}
+
+    <div className="card">
+      <SeasonDeco spot="stats-heatmap" />
+      <h2>{t('Activity (last 12 months)')}</h2>
+      <Heatmap
+        S={S}
+        metric={S.heatmapMetric === 'vol' ? 'vol' : 'time'}
+        onMetricChange={metric => useStore.getState().update(s => { s.heatmapMetric = metric })}
+        onDay={iso => { const ws = workouts.filter(w => workoutDay(w) === iso); if (ws.length === 1) workoutDetailSheet(ws[0]); else if (ws.length) calendarSheet(iso); else dayOverrideSheet(iso) }}
+      />
+    </div>
+
+    </>}
+    {/* Everything else, one tap away (HIG: a short page, the rest a row deeper). */}
+    <h4 className="sec">{t('More')}</h4>
+    <div className="list">
+      {workouts.length > 0 && <div className="item" {...tappable(() => nav('/structural-balance'))}><span className="lrow-i"><Icon name="figureStrength" /></span><div className="grow"><div className="tt">{t('Structural balance')}</div></div><Icon name="chevronRight" className="chev" /></div>}
+      {(workouts.length > 0 || dayPhotosOf(S).length > 0) && <div className="item" {...tappable(() => nav('/progress-photos'))}><span className="lrow-i"><Icon name="camera" /></span><div className="grow"><div className="tt">{t('Progress photos')}</div></div><Icon name="chevronRight" className="chev" /></div>}
+      <div className="item" {...tappable(() => nav('/measurements'))}><span className="lrow-i"><Icon name="ruler" /></span><div className="grow"><div className="tt">{t('Body measurements')}</div>{(S.measurements || []).length > 0 && <div className="ss">{t('Last check-in {0}', fmtDate(S.measurements[S.measurements.length - 1].d, true))}</div>}</div><Icon name="chevronRight" className="chev" /></div>
+    </div>
   </>
 }

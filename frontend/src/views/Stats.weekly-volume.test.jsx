@@ -5,6 +5,9 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { MUSCLES } from '../lib/muscles.js'
 import Stats from './Stats.jsx'
 
+// The deeper cards sit under Stats' Details toggle; these tests read them, so open it.
+const openDetails = () => { const b = document.querySelector('.stats-details[aria-expanded="false"]'); if (b) act(() => b.click()) }
+
 const NOW = new Date(2026, 8, 30, 12).getTime()
 const press = { id: 'press', n: 'Press', primaries: ['chest'], secondaries: ['triceps'], custom: true }
 const mocks = vi.hoisted(() => ({ S: null, bodyMaps: [], nav: null }))
@@ -46,7 +49,7 @@ beforeEach(() => {
 })
 afterEach(() => { act(() => root.unmount()); host.remove(); vi.useRealTimers() })
 
-const mount = () => act(() => root.render(<Stats />))
+const mount = () => { act(() => root.render(<Stats />)); openDetails() }
 const comparison = () => host.querySelector('[data-weekly-volume-comparison]')
 const button = label => host.querySelector(`button[aria-label="${label}"]`)
 const weeklyToggle = () => comparison().querySelector('.weekly-volume-toggle')
