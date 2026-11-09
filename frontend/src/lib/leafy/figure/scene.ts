@@ -93,7 +93,7 @@ function glow(J: Joints, m: Muscle, role: 'p' | 's', op: number): Glow {
   };
 }
 
-const CABLE_FROM: Record<Cable, (h: V) => V> = {
+export const CABLE_FROM: Record<Cable, (h: V) => V> = {
   high: h => [h[0] + 70, 22],
   low: h => [h[0] + 80, 186],
   front: h => [228, h[1]],
@@ -122,7 +122,7 @@ function props(J: Joints, eq: Equipment, t: Template, out: Prim[]) {
   }
 }
 
-function stage(J: Joints, s: string | undefined, out: Prim[]) {
+export function stage(J: Joints, s: string | undefined, out: Prim[]) {
   const P = (pts: V[]) => out.push({ k: 'poly', pts, layer: 'back', prop: true });
   const Ln = (a: V, b: V, w = 4) => out.push({ k: 'line', a, b, w, layer: 'back', prop: true });
   if (s === 'bench' || s === 'proneBench') {

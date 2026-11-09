@@ -2367,3 +2367,5 @@ button.wl-summary{width:100%;padding:0 0 10px;text-align:start;border-radius:var
 .garden-day.grew{background:var(--acc-soft);color:var(--acc)}
 .garden-day.today{box-shadow:inset 0 0 0 1.5px var(--acc)}
 .garden-day.future{opacity:.5}
+.leafyfig.turnable svg{touch-action:pan-y;cursor:grab}
+.leafyfig-cue{text-align:center;font-weight:600;font-size:17px;padding:4px 0 10px;min-height:24px}

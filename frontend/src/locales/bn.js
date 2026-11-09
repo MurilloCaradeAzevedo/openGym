@@ -2790,4 +2790,8 @@ export default {
   'One more leaf in your garden.': 'তোমার বাগানে আরও একটি পাতা।',
   'Little by little is still a way.': 'একটু একটু করেও একটা পথ।',
   'Glad you stopped by.': 'তুমি এসেছ, ভালো লাগল।',
+  'Move slowly': 'ধীরে',
+  'Hold': 'ধরে রাখো',
+  'Come back with control': 'নিয়ন্ত্রণে ফেরো',
+  'Breathe': 'শ্বাস নাও',
 }

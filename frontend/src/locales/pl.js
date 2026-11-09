@@ -2711,4 +2711,8 @@ export default {
   'One more leaf in your garden.': 'Jeszcze jeden liść w twoim ogrodzie.',
   'Little by little is still a way.': 'Krok po kroku to też droga.',
   'Glad you stopped by.': 'Dobrze, że zajrzałeś.',
+  'Move slowly': 'Powoli',
+  'Hold': 'Przytrzymaj',
+  'Come back with control': 'Wróć pod kontrolą',
+  'Breathe': 'Oddychaj',
 }

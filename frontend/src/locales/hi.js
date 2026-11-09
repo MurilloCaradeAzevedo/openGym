@@ -2711,4 +2711,8 @@ export default {
   'One more leaf in your garden.': 'तुम्हारे बगीचे में एक और पत्ती।',
   'Little by little is still a way.': 'थोड़ा-थोड़ा भी एक रास्ता है।',
   'Glad you stopped by.': 'अच्छा लगा कि तुम आए।',
+  'Move slowly': 'धीरे',
+  'Hold': 'रुको',
+  'Come back with control': 'नियंत्रण से लौटो',
+  'Breathe': 'सांस लो',
 }

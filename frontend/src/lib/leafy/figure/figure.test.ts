@@ -68,7 +68,7 @@ describe('classificador', () => {
     ['Barbell Bench Press - Medium Grip', 'benchPress'],
     ['Dumbbell Bicep Curl', 'curl'],
     ['Standing Military Press', 'press'],
-    ['Side Lateral Raise', 'raise'],
+    ['Side Lateral Raise', 'lateralRaise'],
     ['Bent Over Barbell Row', 'row'],
     ['Seated Cable Rows', 'seatedRow'],
     ['Wide-Grip Lat Pulldown', 'pulldown'],

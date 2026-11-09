@@ -2714,4 +2714,8 @@ export default {
   'One more leaf in your garden.': 'Még egy levél a kertedben.',
   'Little by little is still a way.': 'Apránként is út.',
   'Glad you stopped by.': 'Jó, hogy benéztél.',
+  'Move slowly': 'Lassan',
+  'Hold': 'Tartsd',
+  'Come back with control': 'Vissza kontrolláltan',
+  'Breathe': 'Lélegezz',
 }

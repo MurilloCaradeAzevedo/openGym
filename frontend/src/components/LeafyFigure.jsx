@@ -1,19 +1,22 @@
-import { useEffect, useId, useMemo, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import { fromExdb } from '../lib/leafy/catalogue-adapter.ts'
 import { classify } from '../lib/leafy/figure/classify.ts'
-import { sceneAt } from '../lib/leafy/figure/scene.ts'
-import { GROUND, VIEW } from '../lib/leafy/figure/skeleton.ts'
-import { exerciseNameFor } from '../lib/i18n.js'
+import { defaultYaw, scene3At, VIEW3 } from '../lib/leafy/figure/three.ts'
+import { t, exerciseNameFor } from '../lib/i18n.js'
 
-// Leafy's own drawing of an exercise: a side-view figure that moves between two poses, with the
-// muscles it works lit in green (strong for the main ones, light for those that help). Drawn here
-// from the exercise's data; nothing in it is a photo or an animation made by anyone else.
-const TONE = { body: 'rgba(128,128,128,.55)', far: 'rgba(128,128,128,.28)', prop: 'rgba(128,128,128,.8)', line: 'rgba(128,128,128,.35)' }
+// Leafy's own drawing of an exercise, in 3D: the body turns to the angle that shows the movement
+// best, the muscles it works are lit in green (strong for the main ones, light for those that
+// help), and it moves in a paced rhythm: go, hold, come back, breathe. In the big view it can be
+// turned by dragging, and a short line says which part of the rhythm it is in. Drawn here from
+// the exercise's data; nothing in it is a photo or an animation made by anyone else.
+const PERIOD = 3800
 const GLOW = { p: '#2E7D32', s: '#66BB6A' }
-const PERIOD = 3200
+const CUES = ['Move slowly', 'Hold', 'Come back with control', 'Breathe']
+const darkScheme = () => typeof matchMedia === 'function' && matchMedia('(prefers-color-scheme: dark)').matches
+const reducedMotion = () => typeof matchMedia === 'function' && matchMedia('(prefers-reduced-motion: reduce)').matches
 
 function useCycle(still) {
-  const [cycle, setCycle] = useState(0.5)
+  const [cycle, setCycle] = useState(0.45)
   useEffect(() => {
     if (still) return undefined
     let raf = 0
@@ -27,44 +30,55 @@ function useCycle(still) {
     raf = requestAnimationFrame(tick)
     return () => cancelAnimationFrame(raf)
   }, [still])
-  return still ? 0.5 : cycle
+  return still ? 0.45 : cycle
 }
 
-const reducedMotion = () => typeof matchMedia === 'function' && matchMedia('(prefers-reduced-motion: reduce)').matches
+function tone(k, dark) {
+  const near = dark ? [150, 147, 140] : [150, 146, 138]
+  const far = dark ? [78, 77, 73] : [218, 215, 208]
+  return `rgb(${near.map((n, i) => Math.round(far[i] + (n - far[i]) * k)).join(',')})`
+}
 
-function Shape({ p, color }) {
-  if (p.k === 'line') return <line x1={p.a[0]} y1={p.a[1]} x2={p.b[0]} y2={p.b[1]} stroke={color} strokeWidth={p.w} strokeLinecap="round" />
-  if (p.k === 'circle') return p.ring
-    ? <circle cx={p.c[0]} cy={p.c[1]} r={p.r} fill="none" stroke={color} strokeWidth="3" />
-    : <circle cx={p.c[0]} cy={p.c[1]} r={p.r} fill={color} />
-  return <polygon points={p.pts.map(q => q.join(',')).join(' ')} fill={color} stroke={color} strokeWidth="4" strokeLinejoin="round" />
+function Shape({ s, dark }) {
+  const color = s.role === 'p' || s.role === 's' ? GLOW[s.role]
+    : s.role === 'prop' ? (dark ? '#C9C6BD' : '#5F5E5A')
+      : s.role === 'floor' ? 'var(--line, rgba(128,128,128,.25))'
+        : tone(s.k, dark)
+  const op = s.op ?? (s.role === 'floor' ? 0.6 : 1)
+  if (s.t === 'line') return <line x1={s.a[0]} y1={s.a[1]} x2={s.b[0]} y2={s.b[1]} stroke={color} strokeWidth={s.w} strokeLinecap="round" opacity={op} />
+  if (s.t === 'circle') return s.ring
+    ? <circle cx={s.c[0]} cy={s.c[1]} r={s.r} fill="none" stroke={color} strokeWidth="3" opacity={op} />
+    : <circle cx={s.c[0]} cy={s.c[1]} r={s.r} fill={color} opacity={op} />
+  return <polygon points={s.pts.map(q => q.join(',')).join(' ')} fill={color} stroke={color} strokeWidth="5" strokeLinejoin="round" opacity={op} />
 }
 
 export default function LeafyFigure({ ex, id, compact, paused }) {
   const figure = useMemo(() => { const d = fromExdb(ex); return d ? classify(d) : null }, [ex])
+  const [yaw, setYaw] = useState(null)
+  const drag = useRef(null)
   const cycle = useCycle(!!paused || reducedMotion())
-  const maskId = 'lf' + useId().replace(/:/g, '')
   if (!figure) return null
-  const scene = sceneAt(figure, cycle)
-  const tone = p => (p.prop ? TONE.prop : p.layer === 'far' ? TONE.far : TONE.body)
+  const angle = yaw ?? defaultYaw(figure)
+  const scene = scene3At(figure, cycle, angle)
+  const dark = darkScheme()
+  const turnable = !compact
+  const handlers = turnable ? {
+    onPointerDown: e => { drag.current = e.clientX; e.currentTarget.setPointerCapture?.(e.pointerId) },
+    onPointerMove: e => {
+      if (drag.current == null) return
+      const dx = e.clientX - drag.current
+      drag.current = e.clientX
+      setYaw(Math.max(-90, Math.min(90, angle + dx * 0.6)))
+    },
+    onPointerUp: () => { drag.current = null },
+    onPointerCancel: () => { drag.current = null },
+  } : {}
   return (
-    <div className={'exmedia leafyfig' + (compact ? ' compact' : '')} id={id}>
-      <svg viewBox={`0 ${VIEW.top} ${VIEW.w} ${VIEW.h}`} role="img" aria-label={exerciseNameFor(ex)}>
-        <defs>
-          <mask id={maskId} maskUnits="userSpaceOnUse" x="0" y={VIEW.top} width={VIEW.w} height={VIEW.h}>
-            {scene.prims.filter(p => p.layer === 'body' && !p.prop).map((p, i) => <Shape key={i} p={p} color="#fff" />)}
-          </mask>
-        </defs>
-        {scene.ground && <line x1="0" y1={GROUND} x2={VIEW.w} y2={GROUND} stroke={TONE.line} strokeWidth="1.5" />}
-        {scene.prims.filter(p => p.layer !== 'front').map((p, i) => <Shape key={i} p={p} color={tone(p)} />)}
-        <g mask={`url(#${maskId})`}>
-          {scene.glows.map(g => (
-            <ellipse key={g.role + g.muscle} cx={g.c[0]} cy={g.c[1]} rx={g.rx} ry={g.ry}
-              transform={`rotate(${g.rot} ${g.c[0]} ${g.c[1]})`} fill={GLOW[g.role]} opacity={g.op} />
-          ))}
-        </g>
-        {scene.prims.filter(p => p.layer === 'front').map((p, i) => <Shape key={'f' + i} p={p} color={tone(p)} />)}
+    <div className={'exmedia leafyfig' + (compact ? ' compact' : '') + (turnable ? ' turnable' : '')} id={id}>
+      <svg viewBox={`0 0 ${VIEW3.w} ${VIEW3.h}`} role="img" aria-label={exerciseNameFor(ex)} {...handlers}>
+        {scene.shapes.map((s, i) => <Shape key={i} s={s} dark={dark} />)}
       </svg>
+      {turnable && <div className="leafyfig-cue" aria-live="polite">{t(CUES[scene.phase])}</div>}
     </div>
   )
 }

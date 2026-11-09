@@ -2704,4 +2704,8 @@ export default {
   'One more leaf in your garden.': '你的花園又多了一片葉子。',
   'Little by little is still a way.': '一點一點也是一條路。',
   'Glad you stopped by.': '很高興你來了。',
+  'Move slowly': '慢慢來',
+  'Hold': '保持',
+  'Come back with control': '控制著回來',
+  'Breathe': '呼吸',
 }

@@ -18,6 +18,10 @@ export type Template = {
   hold?: boolean;
   /** Só a parte de cima se mexe; pode ser feito em pé ou sentado. */
   upper?: boolean;
+  /** Opening to the sides, in degrees, from the first pose to the second (3D only): arms or legs. */
+  spread?: { arm?: [number, number]; leg?: [number, number] };
+  /** Camera angle that shows the movement best (3D), degrees around the body: 0 side, 90 front. */
+  yaw?: number;
 };
 
 export type Hold = 'side' | 'front' | 'back' | 'frontRack' | 'chest' | 'overhead' | 'hips' | 'head' | 'cross' | 'push';
@@ -83,7 +87,8 @@ export const TEMPLATES = {
     stage: 'sled',
     frames: pair({ anchor: 'hip', at: [86, 150], torso: -140, thigh: 0, shin: 0, foot: -40, arm: 60, fore: 30 }, { ankle: [118, 112] }, { ankle: [146, 90] }),
   },
-  hipMachine: { stage: 'machine', frames: pair(SEAT, { thighB: -2, shinB: 92, arm: 95, fore: 60 }, { thighB: 15, shinB: 100, arm: 95, fore: 60 }) },
+  hipMachine: { stage: 'machine', yaw: 75, spread: { leg: [0, 28] }, frames: pair(SEAT, { arm: 95, fore: 60 }, { arm: 95, fore: 60 }) },
+  hipAdduct: { stage: 'machine', yaw: 75, spread: { leg: [28, 0] }, frames: pair(SEAT, { arm: 95, fore: 60 }, { arm: 95, fore: 60 }) },
   pulldown: { stage: 'seat', cable: 'over', frames: pair(f(SEAT, { torso: -95 }), { handT: [4, 50] }, { handT: [12, 2] }) },
   seatedRow: {
     stage: 'lowSeat',
@@ -94,7 +99,8 @@ export const TEMPLATES = {
   reverseFly: { frames: pair(BENT, { arm: 90, fore: 90 }, { arm: 175, fore: 175 }) },
   uprightRow: { frames: pair(STAND, { handT: [6, -50], bendArm: -1 }, { handT: [12, -2], bendArm: -1 }) },
   shrug: { upper: true, frames: pair(STAND, { arm: 90, fore: 90 }, { arm: 90, fore: 90, lift: 5 }) },
-  raise: { upper: true, frames: pair(STAND, { arm: 88, fore: 88 }, { arm: -2, fore: -6 }) },
+  raise: { upper: true, yaw: 25, frames: pair(STAND, { arm: 88, fore: 88 }, { arm: -2, fore: -6 }) },
+  lateralRaise: { upper: true, yaw: 80, spread: { arm: [4, 86] }, frames: pair(STAND, { arm: 90, fore: 88 }, { arm: 90, fore: 86 }) },
   press: { upper: true, frames: pair(STAND, { handT: [11, 3], bendArm: -1 }, { handT: [2, 52], bendArm: -1 }) },
   curl: { upper: true, cable: 'low', frames: pair(STAND, { arm: 92, fore: 92 }, { arm: 85, fore: -70 }) },
   wrist: { upper: true, frames: pair(SEAT, { arm: 90, fore: -12 }, { arm: 90, fore: 12 }) },
@@ -103,7 +109,7 @@ export const TEMPLATES = {
   kickback: { frames: pair(BENT, { arm: 180, fore: 90 }, { arm: 180, fore: 180 }) },
   standPress: { cable: 'front', frames: pair(f(STAND, { torso: -80 }), { handT: [16, 0] }, { handT: [50, -4] }) },
   benchPress: { stage: 'bench', frames: pair(LIE_BENCH, { handT: [52, 1] }, { handT: [12, -2] }) },
-  fly: { stage: 'bench', frames: pair(LIE_BENCH, { handT: [52, 1] }, { handT: [20, 6], bendArm: -1 }) },
+  fly: { stage: 'bench', yaw: 70, spread: { arm: [0, 72] }, frames: pair(LIE_BENCH, { handT: [50, 3] }, { handT: [50, 3] }) },
   skull: { stage: 'bench', frames: pair(LIE_BENCH, { handT: [52, 2] }, { handT: [28, 20], bendArm: -1 }) },
   pullover: { stage: 'bench', frames: pair(LIE_BENCH, { handT: [50, 8] }, { handT: [8, 50] }) },
   crunch: { hold: true, frames: pair(LIE_FLOOR, {}, { torso: 210 }) },

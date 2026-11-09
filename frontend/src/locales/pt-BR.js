@@ -4,6 +4,10 @@
 import pt from './pt.js'
 
 export const PT_BR_OVERRIDES = {
+  'Move slowly': 'Devagar',
+  'Hold': 'Segure',
+  'Come back with control': 'Volte com controle',
+  'Breathe': 'Respire',
   'Movement of the day': 'Movimento do dia',
   'Another idea': 'Outra ideia',
   '{0} × {1} reps': '{0} × {1} repetições',

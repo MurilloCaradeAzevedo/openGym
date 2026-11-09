@@ -2708,4 +2708,8 @@ export default {
   'One more leaf in your garden.': 'Ще один листок у твоєму саду.',
   'Little by little is still a way.': 'Потроху — теж шлях.',
   'Glad you stopped by.': 'Добре, що ти зазирнув.',
+  'Move slowly': 'Повільно',
+  'Hold': 'Затримайся',
+  'Come back with control': 'Повернись під контролем',
+  'Breathe': 'Дихай',
 }

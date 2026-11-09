@@ -2711,4 +2711,8 @@ export default {
   'One more leaf in your garden.': '你的花园又多了一片叶子。',
   'Little by little is still a way.': '一点一点也是一条路。',
   'Glad you stopped by.': '很高兴你来了。',
+  'Move slowly': '慢慢来',
+  'Hold': '保持',
+  'Come back with control': '控制着回来',
+  'Breathe': '呼吸',
 }

@@ -2711,4 +2711,8 @@ export default {
   'One more leaf in your garden.': '정원에 잎이 하나 더 생겼어요.',
   'Little by little is still a way.': '조금씩도 길이에요.',
   'Glad you stopped by.': '들러 줘서 반가워요.',
+  'Move slowly': '천천히',
+  'Hold': '멈추기',
+  'Come back with control': '조절하며 돌아오기',
+  'Breathe': '호흡',
 }

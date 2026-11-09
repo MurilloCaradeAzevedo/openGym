@@ -2711,4 +2711,8 @@ export default {
   'One more leaf in your garden.': 'Bahçende bir yaprak daha.',
   'Little by little is still a way.': 'Azar azar da bir yoldur.',
   'Glad you stopped by.': 'Uğradığına sevindim.',
+  'Move slowly': 'Yavaşça',
+  'Hold': 'Tut',
+  'Come back with control': 'Kontrollü dön',
+  'Breathe': 'Nefes al',
 }

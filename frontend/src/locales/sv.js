@@ -2758,4 +2758,8 @@ export default {
   'One more leaf in your garden.': 'Ett blad till i din trädgård.',
   'Little by little is still a way.': 'Lite i taget är också en väg.',
   'Glad you stopped by.': 'Kul att du tittade in.',
+  'Move slowly': 'Långsamt',
+  'Hold': 'Håll',
+  'Come back with control': 'Tillbaka med kontroll',
+  'Breathe': 'Andas',
 }

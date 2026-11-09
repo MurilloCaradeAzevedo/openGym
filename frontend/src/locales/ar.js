@@ -2766,4 +2766,8 @@ export default {
   'One more leaf in your garden.': 'ورقة أخرى في حديقتك.',
   'Little by little is still a way.': 'خطوة بخطوة هو طريق أيضًا.',
   'Glad you stopped by.': 'سعداء بمرورك.',
+  'Move slowly': 'ببطء',
+  'Hold': 'اثبت',
+  'Come back with control': 'عُد بتحكم',
+  'Breathe': 'تنفس',
 }

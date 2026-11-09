@@ -6,14 +6,12 @@ import LeafyFigure from './LeafyFigure.jsx'
 const html = ex => renderToStaticMarkup(<LeafyFigure ex={ex} />)
 
 describe('LeafyFigure', () => {
-  it('draws a labelled figure with one glow per muscle worked', () => {
+  it('draws a labelled figure with the muscles it works lit in green', () => {
     const ex = EXDB.find(e => e.tg === 'quads' && e.sm?.length)
     const out = html(ex)
     expect(out).toContain('<svg')
     expect(out).toContain('role="img"')
-    const muscles = new Set([ex.tg, ...ex.sm]).size
-    expect(out.match(/<ellipse/g).length).toBeLessThanOrEqual(muscles)
-    expect(out.match(/<ellipse/g).length).toBeGreaterThan(0)
+    expect(out).toMatch(/#2E7D32/)
   })
 
   it('never carries a picture from anywhere else', () => {

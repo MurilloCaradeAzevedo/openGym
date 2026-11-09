@@ -2722,4 +2722,8 @@ export default {
   'One more leaf in your garden.': 'ใบไม้อีกใบในสวนของคุณ',
   'Little by little is still a way.': 'ทีละนิดก็เป็นหนทาง',
   'Glad you stopped by.': 'ดีใจที่แวะมา',
+  'Move slowly': 'ช้าๆ',
+  'Hold': 'ค้างไว้',
+  'Come back with control': 'กลับอย่างควบคุม',
+  'Breathe': 'หายใจ',
 }
